@@ -1,6 +1,6 @@
 import { Box, Link, Slider, Typography } from '@material-ui/core';
 import { Container } from 'next/app';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import ReactPlayer from 'react-player';
 
 export const Home: React.FC = () => {
@@ -9,9 +9,10 @@ export const Home: React.FC = () => {
   const [max, setMax] = useState(0);
   const [curr, setCurr] = useState(0);
 
-  useEffect(() => {
-    playerEl.current.seekTo(curr);
-  }, [curr]);
+  const handleSliderChange = (_e: React.ChangeEvent<{}>, value: number) => {
+    setCurr(value);
+    playerEl.current.seekTo(value);
+  };
 
   return (
     <Container maxWidth="sm">
@@ -38,7 +39,8 @@ export const Home: React.FC = () => {
           step={1}
           min={min}
           max={max}
-          onChange={(_e, n: number) => setCurr(n)}
+          onChange={handleSliderChange}
+          valueLabelDisplay="auto"
           marks
         />
       )}
