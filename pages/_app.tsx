@@ -4,6 +4,7 @@ import Head from 'next/head';
 import React, { useEffect } from 'react';
 
 import theme from '../theme';
+import './main.css';
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
   useEffect(() => {

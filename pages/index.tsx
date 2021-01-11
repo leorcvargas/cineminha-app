@@ -1,50 +1,56 @@
-import { Box, Link, Slider, Typography } from '@material-ui/core';
-import { Container } from 'next/app';
-import React, { useRef, useState } from 'react';
-import ReactPlayer from 'react-player';
+import {
+  Box,
+  Button,
+  Container,
+  createStyles,
+  Grid,
+  makeStyles,
+  Typography,
+} from '@material-ui/core';
+import React from 'react';
+
+import AppLayout from '../layout/app';
+
+const useStyles = makeStyles((_theme) =>
+  createStyles({
+    container: {
+      height: '400px',
+    },
+    buttonWrapper: {
+      height: '100%',
+    },
+  })
+);
 
 export const Home: React.FC = () => {
-  const playerEl = useRef(null);
-  const min = 0;
-  const [max, setMax] = useState(0);
-  const [curr, setCurr] = useState(0);
-
-  const handleSliderChange = (_e: React.ChangeEvent<{}>, value: number) => {
-    setCurr(value);
-    playerEl.current.seekTo(value);
-  };
+  const classes = useStyles();
 
   return (
-    <Container maxWidth="sm">
-      <Box my={4}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Next.js example
-        </Typography>
-        <Link href="/about" color="secondary">
-          Go to the about page
-        </Link>
-      </Box>
-      <ReactPlayer
-        ref={playerEl}
-        url="https://www.youtube.com/watch?v=v2SjAjPD9sY"
-        pip={false}
-        onReady={(player) => {
-          setMax(player.getDuration());
-        }}
-        controls
-      />
-      {max !== 0 && (
-        <Slider
-          value={curr}
-          step={1}
-          min={min}
-          max={max}
-          onChange={handleSliderChange}
-          valueLabelDisplay="auto"
-          marks
-        />
-      )}
-    </Container>
+    <AppLayout>
+      <Container className={classes.container}>
+        <Grid
+          container
+          justify="center"
+          alignItems="center"
+          direction="column"
+          className={classes.buttonWrapper}
+          spacing={2}
+        >
+          <Grid item>
+            <Box color="common.white" clone>
+              <Typography variant="h2" component="h2">
+                Watch videos with your friends
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item>
+            <Button variant="contained" color="primary">
+              New Room
+            </Button>
+          </Grid>
+        </Grid>
+      </Container>
+    </AppLayout>
   );
 };
 
