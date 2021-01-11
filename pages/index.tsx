@@ -10,7 +10,9 @@ export const Home: React.FC = () => {
   const [curr, setCurr] = useState(0);
 
   useEffect(() => {
-    playerEl.current.player.seekTo(curr);
+    if (playerEl.current && playerEl.current.player) {
+      playerEl.current.player.seekTo(curr);
+    }
   }, [curr]);
 
   return (
@@ -38,7 +40,6 @@ export const Home: React.FC = () => {
           step={1}
           min={min}
           max={max}
-          // eslint-disable-next-line no-console
           onChange={(_e, n: number) => setCurr(n)}
           marks
         />
