@@ -10,9 +10,7 @@ export const Home: React.FC = () => {
   const [curr, setCurr] = useState(0);
 
   useEffect(() => {
-    if (playerEl.current && playerEl.current.player) {
-      playerEl.current.player.seekTo(curr);
-    }
+    playerEl.current.seekTo(curr);
   }, [curr]);
 
   return (
