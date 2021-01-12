@@ -44,6 +44,8 @@ const Room: FC<RoomProps> = ({ slug }) => {
     const events = {
       videoChangeURL: `room:${slug}:video:change:url`,
       videoChangeTime: `room:${slug}:video:change:time`,
+      videoPlay: `room:${slug}:video:play`,
+      videoPause: `room:${slug}:video:pause`,
     };
 
     const videoChangeURLListener = channel.on(
@@ -54,14 +56,20 @@ const Room: FC<RoomProps> = ({ slug }) => {
     );
     const videoChangeTimeListener = channel.on(
       events.videoChangeTime,
-      (response) => {
-        setVideoProgress(response.time);
-      }
+      (response) => onSeek(response.time)
     );
+    const videoPlayListener = channel.on(events.videoPlay, () => {
+      setPlaying(true);
+    });
+    const videoPauseListener = channel.on(events.videoPause, () => {
+      setPlaying(false);
+    });
 
     return () => {
       channel.off(events.videoChangeURL, videoChangeURLListener);
       channel.off(events.videoChangeTime, videoChangeTimeListener);
+      channel.off(events.videoPlay, videoPlayListener);
+      channel.off(events.videoPause, videoPauseListener);
     };
   }, [channel]);
 
@@ -71,9 +79,15 @@ const Room: FC<RoomProps> = ({ slug }) => {
     channel.push('room:video:change:url', { url: event.target[0].value });
   };
 
-  const onPlay = () => setPlaying(true);
+  const onPlay = () => {
+    setPlaying(true);
+    channel.push('room:video:play', {});
+  };
 
-  const onPause = () => setPlaying(false);
+  const onPause = () => {
+    setPlaying(false);
+    channel.push('room:video:pause', {});
+  };
 
   const onInternalPlayerProgress = (state: { playedSeconds: number }) => {
     setVideoProgress(state.playedSeconds);
