@@ -6,9 +6,10 @@ import {
   Paper,
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useRef } from 'react';
+import ReactPlayer from 'react-player';
 
-import Player from '../../components/player';
+import PlayerWrapper from '../../components/PlayerWrapper';
 import useChannel from '../../hooks/useChannel';
 import { useStyles } from './styles';
 
@@ -17,12 +18,23 @@ interface RoomProps {
 }
 
 const Room: FC<RoomProps> = ({ slug }) => {
+  const playerRef = useRef(null);
   const classes = useStyles();
   const [channel] = useChannel(`room:${slug}`);
 
   const [videoURL, setVideoURL] = useState(
     'https://www.youtube.com/watch?v=v2SjAjPD9sY'
   );
+  const [playing, setPlaying] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
+  const [videoDuration, setVideoDuration] = useState(60);
+  const [volume, setVolume] = useState(0.5);
+
+  useEffect(() => {
+    if (playerRef.current?.player.isReady) {
+      setVideoDuration(playerRef.current.getDuration());
+    }
+  }, [playerRef.current?.player?.isReady]);
 
   useEffect(() => {
     if (!channel) {
@@ -45,6 +57,20 @@ const Room: FC<RoomProps> = ({ slug }) => {
     setVideoURL(event.target[0].value);
     channel.push('room:video:change', { url: event.target[0].value });
   };
+
+  const onPlay = () => setPlaying(true);
+
+  const onPause = () => setPlaying(false);
+
+  const onProgress = (state: { playedSeconds: number }) =>
+    setVideoProgress(state.playedSeconds);
+
+  const onSeek = (time: number) => {
+    playerRef.current.seekTo(time);
+    setVideoProgress(time);
+  };
+
+  const onChangeVolume = (value: number) => setVolume(value);
 
   return (
     <Container maxWidth="lg">
@@ -70,7 +96,28 @@ const Room: FC<RoomProps> = ({ slug }) => {
           </Paper>
         </Grid>
         <Grid item>
-          <Player url={videoURL} pip={false} controls />
+          <PlayerWrapper
+            play={onPlay}
+            pause={onPause}
+            playing={playing}
+            videoProgress={videoProgress}
+            videoDuration={videoDuration}
+            onSeek={onSeek}
+            onChangeVolume={onChangeVolume}
+            volume={volume}
+          >
+            <ReactPlayer
+              url={videoURL}
+              pip={false}
+              onProgress={onProgress}
+              onPlay={onPlay}
+              onPause={onPause}
+              ref={playerRef}
+              controls={false}
+              playing={playing}
+              volume={volume}
+            />
+          </PlayerWrapper>
         </Grid>
       </Grid>
     </Container>
