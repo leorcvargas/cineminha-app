@@ -19,6 +19,7 @@ interface PlayerWrapperProps {
   videoProgress: number;
   videoDuration: number;
   onSeek: (time: number) => void;
+  onSeekCommitted: (time: number) => void;
   onChangeVolume: (value: number) => void;
   volume: number;
 }
@@ -30,6 +31,7 @@ const PlayerWrapper: FC<PlayerWrapperProps> = ({
   videoProgress,
   videoDuration,
   onSeek,
+  onSeekCommitted,
   onChangeVolume,
   volume,
   children,
@@ -45,12 +47,17 @@ const PlayerWrapper: FC<PlayerWrapperProps> = ({
   ]);
 
   const onMouseEnterWrapper = () => setShowControl(true);
+
   const onMouseLeaveWrapper = () => setShowControl(false);
 
   const onMouseEnterVolume = () => setShowVolume(true);
+
   const onMouseLeaveVolume = () => setShowVolume(false);
 
   const onChangeProgressSlider = (_: any, value: number) => onSeek(value);
+
+  const onChangeCommittedProgressSlider = (_: any, value: number) =>
+    onSeekCommitted(value);
 
   const onChangeVolumeSlider = (_: any, value: number) => onChangeVolume(value);
 
@@ -86,6 +93,7 @@ const PlayerWrapper: FC<PlayerWrapperProps> = ({
                 valueLabelDisplay="auto"
                 valueLabelFormat={getTimeLabelText}
                 onChange={onChangeProgressSlider}
+                onChangeCommitted={onChangeCommittedProgressSlider}
               />
 
               <div>

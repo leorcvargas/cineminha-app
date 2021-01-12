@@ -41,33 +41,51 @@ const Room: FC<RoomProps> = ({ slug }) => {
       return;
     }
 
-    const event = `room:${slug}:video:change`;
+    const events = {
+      videoChangeURL: `room:${slug}:video:change:url`,
+      videoChangeTime: `room:${slug}:video:change:time`,
+    };
 
-    const listenerNumber = channel.on(event, (response) => {
-      setVideoURL(response.url);
-    });
+    const videoChangeURLListener = channel.on(
+      events.videoChangeURL,
+      (response) => {
+        setVideoURL(response.url);
+      }
+    );
+    const videoChangeTimeListener = channel.on(
+      events.videoChangeTime,
+      (response) => {
+        setVideoProgress(response.time);
+      }
+    );
 
     return () => {
-      channel.off(event, listenerNumber);
+      channel.off(events.videoChangeURL, videoChangeURLListener);
+      channel.off(events.videoChangeTime, videoChangeTimeListener);
     };
   }, [channel]);
 
   const onSubmit = (event: React.FormEvent<HTMLDivElement>) => {
     event.preventDefault();
     setVideoURL(event.target[0].value);
-    channel.push('room:video:change', { url: event.target[0].value });
+    channel.push('room:video:change:url', { url: event.target[0].value });
   };
 
   const onPlay = () => setPlaying(true);
 
   const onPause = () => setPlaying(false);
 
-  const onProgress = (state: { playedSeconds: number }) =>
+  const onInternalPlayerProgress = (state: { playedSeconds: number }) => {
     setVideoProgress(state.playedSeconds);
+  };
 
   const onSeek = (time: number) => {
     playerRef.current.seekTo(time);
     setVideoProgress(time);
+  };
+
+  const onSeekCommitted = (time: number) => {
+    channel.push('room:video:change:time', { time });
   };
 
   const onChangeVolume = (value: number) => setVolume(value);
@@ -103,13 +121,14 @@ const Room: FC<RoomProps> = ({ slug }) => {
             videoProgress={videoProgress}
             videoDuration={videoDuration}
             onSeek={onSeek}
+            onSeekCommitted={onSeekCommitted}
             onChangeVolume={onChangeVolume}
             volume={volume}
           >
             <ReactPlayer
               url={videoURL}
               pip={false}
-              onProgress={onProgress}
+              onProgress={onInternalPlayerProgress}
               onPlay={onPlay}
               onPause={onPause}
               ref={playerRef}
