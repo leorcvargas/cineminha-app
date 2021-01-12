@@ -2,9 +2,14 @@ import { createStyles, makeStyles } from '@material-ui/core';
 
 export const useStyles = makeStyles((_theme) =>
   createStyles({
-    roomWrapper: {
+    root: {
+      padding: '4px 8px',
       display: 'flex',
-      margin: 'auto',
+      alignItems: 'center',
+      width: 400,
+    },
+    input: {
+      flex: 1,
     },
   })
 );
