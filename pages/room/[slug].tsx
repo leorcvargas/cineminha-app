@@ -9,6 +9,10 @@ const RoomPage = () => {
   const router = useRouter();
   const { slug } = router.query;
 
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
   return (
     <AppLayout>
       <Head>
