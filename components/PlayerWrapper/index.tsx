@@ -3,7 +3,7 @@ import PlayArrowIcon from '@material-ui/icons/PlayArrowRounded';
 import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
 import VolumeMuteIcon from '@material-ui/icons/VolumeMute';
-
+import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import PauseIcon from '@material-ui/icons/Pause';
 import Fade from '@material-ui/core/Fade';
 import Slider from '@material-ui/core/Slider';
@@ -88,35 +88,49 @@ const PlayerWrapper: FC<PlayerWrapperProps> = ({
                 onChange={onChangeProgressSlider}
               />
 
-              <div
-                className={classes.volumeWrapper}
-                onMouseEnter={onMouseEnterVolume}
-                onMouseLeave={onMouseLeaveVolume}
-              >
-                <IconButton edge="start" color="inherit">
-                  {volume >= 0.5 ? (
-                    <VolumeUpIcon />
-                  ) : volume > 0 ? (
-                    <VolumeDownIcon />
-                  ) : (
-                    <VolumeMuteIcon />
-                  )}
-                </IconButton>
-                <Fade in={showVolume}>
-                  <Slider
-                    className={classes.volumeSlider}
-                    min={0}
-                    max={1}
-                    step={0.1}
-                    onChange={onChangeVolumeSlider}
-                    value={volume}
-                    color="secondary"
-                  />
-                </Fade>
+              <div>
+                <div
+                  className={classes.volumeControl}
+                  onMouseEnter={onMouseEnterVolume}
+                  onMouseLeave={onMouseLeaveVolume}
+                >
+                  <IconButton edge="start" color="inherit">
+                    {volume >= 0.5 ? (
+                      <VolumeUpIcon />
+                    ) : volume > 0 ? (
+                      <VolumeDownIcon />
+                    ) : (
+                      <VolumeMuteIcon />
+                    )}
+                  </IconButton>
+                  <Fade in={showVolume}>
+                    <Slider
+                      className={classes.volumeSlider}
+                      min={0}
+                      max={1}
+                      step={0.1}
+                      onChange={onChangeVolumeSlider}
+                      value={volume}
+                      color="secondary"
+                    />
+                  </Fade>
+                </div>
               </div>
+
+              <div className={classes.divisor} />
 
               <div>
                 {progressLabel} / {durationLabel}
+              </div>
+
+              <div>
+                <IconButton
+                  edge="end"
+                  color="inherit"
+                  className={classes.fullScreenButton}
+                >
+                  <FullscreenIcon />
+                </IconButton>
               </div>
             </Toolbar>
           </AppBar>

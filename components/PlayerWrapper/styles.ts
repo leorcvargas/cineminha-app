@@ -22,13 +22,19 @@ export const useStyles = makeStyles((theme) =>
       left: 0,
       padding: 0,
     },
-    volumeWrapper: {
+    divisor: {
+      display: 'flex',
+      flex: 1,
+    },
+    volumeControl: {
       display: 'flex',
       alignItems: 'center',
-      flex: 1,
     },
     volumeSlider: {
       width: 50,
+    },
+    fullScreenButton: {
+      marginLeft: theme.spacing(2),
     },
   })
 );
