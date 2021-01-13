@@ -72,11 +72,17 @@ const Room: FC<RoomProps> = ({ slug }) => {
     );
     const videoPlayListener = channel.on(events.videoPlay, (payload) => {
       onSeek(payload.time);
-      setPlaying(true);
+
+      if (playing === false) {
+        setPlaying(true);
+      }
     });
     const videoPauseListener = channel.on(events.videoPause, (payload) => {
       onSeek(payload.time);
-      setPlaying(false);
+
+      if (playing === true) {
+        setPlaying(false);
+      }
     });
 
     return () => {
@@ -109,7 +115,8 @@ const Room: FC<RoomProps> = ({ slug }) => {
   };
 
   const onInternalPlayerProgress = (state: { playedSeconds: number }) => {
-    setVideoProgress(state.playedSeconds);
+    const { playedSeconds } = state;
+    setVideoProgress(playedSeconds);
   };
 
   const onSeek = (time: number) => {
