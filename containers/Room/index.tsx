@@ -1,4 +1,6 @@
 import {
+  Card,
+  CardMedia,
   Container,
   Grid,
   IconButton,
@@ -6,7 +8,7 @@ import {
   Paper,
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
-import React, { FC, useState, useEffect, useRef } from 'react';
+import React, { FC, useState, useEffect, useRef, useMemo } from 'react';
 import ReactPlayer, { YouTubeConfig } from 'react-player';
 
 import PlayerWrapper from '../../components/PlayerWrapper';
@@ -38,7 +40,16 @@ const Room: FC<RoomProps> = ({ slug }) => {
   const [playing, setPlaying] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoDuration, setVideoDuration] = useState(60);
+  const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(0.5);
+
+  const currentVolume = useMemo(() => {
+    if (muted) {
+      return 0;
+    }
+
+    return volume;
+  }, [volume, muted]);
 
   useEffect(() => {
     if (!channel) return;
@@ -112,6 +123,13 @@ const Room: FC<RoomProps> = ({ slug }) => {
     channel.push('room:video:change:time', { time });
   };
 
+  const onChangeVolume = (value: number) => {
+    setMuted(false);
+    setVolume(value);
+  };
+
+  const toggleMute = () => setMuted(!muted);
+
   return (
     <Container maxWidth="lg">
       <Grid
@@ -136,31 +154,35 @@ const Room: FC<RoomProps> = ({ slug }) => {
           </Paper>
         </Grid>
         <Grid item>
-          <PlayerWrapper
-            play={onPlay}
-            pause={onPause}
-            playing={playing}
-            videoProgress={videoProgress}
-            videoDuration={videoDuration}
-            onSeek={onSeek}
-            onSeekCommitted={onSeekCommitted}
-            onChangeVolume={setVolume}
-            volume={volume}
-          >
-            <ReactPlayer
-              url={videoURL}
-              pip={false}
-              onProgress={onInternalPlayerProgress}
-              onPlay={onPlay}
-              onPause={onPause}
-              onDuration={setVideoDuration}
-              ref={playerRef}
-              controls={false}
+          <Card>
+            <CardMedia>
+              <ReactPlayer
+                url={videoURL}
+                pip={false}
+                onProgress={onInternalPlayerProgress}
+                onPlay={onPlay}
+                onPause={onPause}
+                onDuration={setVideoDuration}
+                ref={playerRef}
+                controls={false}
+                playing={playing}
+                volume={currentVolume}
+                config={{ youtube: YOUTUBE_CONFIG }}
+              />
+            </CardMedia>
+            <PlayerWrapper
+              toggleMute={toggleMute}
+              play={onPlay}
+              pause={onPause}
               playing={playing}
-              volume={volume}
-              config={{ youtube: YOUTUBE_CONFIG }}
+              videoProgress={videoProgress}
+              videoDuration={videoDuration}
+              onSeek={onSeek}
+              onSeekCommitted={onSeekCommitted}
+              onChangeVolume={onChangeVolume}
+              volume={currentVolume}
             />
-          </PlayerWrapper>
+          </Card>
         </Grid>
       </Grid>
     </Container>

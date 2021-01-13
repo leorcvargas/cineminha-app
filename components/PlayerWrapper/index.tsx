@@ -1,4 +1,4 @@
-import { AppBar, IconButton, Toolbar } from '@material-ui/core';
+import { IconButton, Toolbar } from '@material-ui/core';
 import PlayArrowIcon from '@material-ui/icons/PlayArrowRounded';
 import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
@@ -21,6 +21,7 @@ interface PlayerWrapperProps {
   onSeek: (time: number) => void;
   onSeekCommitted: (time: number) => void;
   onChangeVolume: (value: number) => void;
+  toggleMute: () => void;
   volume: number;
 }
 
@@ -34,10 +35,9 @@ const PlayerWrapper: FC<PlayerWrapperProps> = ({
   onSeekCommitted,
   onChangeVolume,
   volume,
-  children,
+  toggleMute,
 }) => {
   const classes = useStyles();
-  const [showControl, setShowControl] = useState(false);
   const [showVolume, setShowVolume] = useState(false);
   const progressLabel = useMemo(() => getTimeLabelText(videoProgress), [
     videoProgress,
@@ -45,10 +45,6 @@ const PlayerWrapper: FC<PlayerWrapperProps> = ({
   const durationLabel = useMemo(() => getTimeLabelText(videoDuration), [
     videoDuration,
   ]);
-
-  const onMouseEnterWrapper = () => setShowControl(true);
-
-  const onMouseLeaveWrapper = () => setShowControl(false);
 
   const onMouseEnterVolume = () => setShowVolume(true);
 
@@ -62,88 +58,83 @@ const PlayerWrapper: FC<PlayerWrapperProps> = ({
   const onChangeVolumeSlider = (_: any, value: number) => onChangeVolume(value);
 
   return (
-    <div
-      className={classes.wrapper}
-      onMouseEnter={onMouseEnterWrapper}
-      onMouseLeave={onMouseLeaveWrapper}
-    >
-      {children}
+    <div className={classes.wrapper}>
+      <Slider
+        classes={{
+          thumb: classes.videoProgressThumb,
+          rail: classes.videoProgressRail,
+          track: classes.videoProgressTrack,
+          root: classes.videoProgressBar,
+        }}
+        color="secondary"
+        value={videoProgress}
+        min={0}
+        max={videoDuration}
+        step={1}
+        valueLabelDisplay="auto"
+        valueLabelFormat={getTimeLabelText}
+        onChange={onChangeProgressSlider}
+        onChangeCommitted={onChangeCommittedProgressSlider}
+      />
+      <Toolbar classes={{ root: classes.controlBar }} variant="dense">
+        <IconButton
+          edge="start"
+          color="inherit"
+          aria-label={playing ? 'pause' : 'play'}
+          onClick={playing ? pause : play}
+          className={classes.playButtom}
+        >
+          {playing ? <PauseIcon /> : <PlayArrowIcon />}
+        </IconButton>
 
-      <div className={classes.wrapper}>
-        <Fade in={showControl}>
-          <AppBar position="absolute" className={classes.controlBar}>
-            <Toolbar>
-              <IconButton
-                edge="start"
-                className={classes.playButton}
-                color="inherit"
-                aria-label={playing ? 'pause' : 'play'}
-                onClick={playing ? pause : play}
-              >
-                {playing ? <PauseIcon /> : <PlayArrowIcon />}
-              </IconButton>
+        <div
+          className={classes.volumeControl}
+          onMouseEnter={onMouseEnterVolume}
+          onMouseLeave={onMouseLeaveVolume}
+        >
+          <IconButton
+            edge="start"
+            color="inherit"
+            onClick={toggleMute}
+            className={classes.volumeButtom}
+          >
+            {volume >= 0.5 ? (
+              <VolumeUpIcon />
+            ) : volume > 0 ? (
+              <VolumeDownIcon />
+            ) : (
+              <VolumeMuteIcon />
+            )}
+          </IconButton>
+          <Fade in={showVolume}>
+            <Slider
+              className={classes.volumeSlider}
+              min={0}
+              max={1}
+              step={0.1}
+              onChange={onChangeVolumeSlider}
+              value={volume}
+              color="secondary"
+            />
+          </Fade>
+        </div>
 
-              <Slider
-                className={classes.videoProgressBar}
-                color="secondary"
-                value={videoProgress}
-                min={0}
-                max={videoDuration}
-                step={1}
-                valueLabelDisplay="auto"
-                valueLabelFormat={getTimeLabelText}
-                onChange={onChangeProgressSlider}
-                onChangeCommitted={onChangeCommittedProgressSlider}
-              />
+        <div className={classes.divisor} />
 
-              <div>
-                <div
-                  className={classes.volumeControl}
-                  onMouseEnter={onMouseEnterVolume}
-                  onMouseLeave={onMouseLeaveVolume}
-                >
-                  <IconButton edge="start" color="inherit">
-                    {volume >= 0.5 ? (
-                      <VolumeUpIcon />
-                    ) : volume > 0 ? (
-                      <VolumeDownIcon />
-                    ) : (
-                      <VolumeMuteIcon />
-                    )}
-                  </IconButton>
-                  <Fade in={showVolume}>
-                    <Slider
-                      className={classes.volumeSlider}
-                      min={0}
-                      max={1}
-                      step={0.1}
-                      onChange={onChangeVolumeSlider}
-                      value={volume}
-                      color="secondary"
-                    />
-                  </Fade>
-                </div>
-              </div>
+        <div>
+          {progressLabel} / {durationLabel}
+        </div>
 
-              <div className={classes.divisor} />
-
-              <div>
-                {progressLabel} / {durationLabel}
-              </div>
-
-              <div>
-                <IconButton
-                  edge="end"
-                  color="inherit"
-                  className={classes.fullScreenButton}
-                >
-                  <FullscreenIcon />
-                </IconButton>
-              </div>
-            </Toolbar>
-          </AppBar>
-        </Fade>
-      </div>
+        <div>
+          <IconButton
+            edge="end"
+            color="inherit"
+            className={classes.fullScreenButton}
+          >
+            <FullscreenIcon />
+          </IconButton>
+        </div>
+      </Toolbar>
     </div>
   );
 };

@@ -7,20 +7,25 @@ export const useStyles = makeStyles((theme) =>
       display: 'flex',
       flexDirection: 'column',
     },
-    controlWrapper: {
-      position: 'relative',
-    },
     controlBar: {
-      top: 'auto',
-      bottom: 0,
       background: theme.palette.grey[900],
+      color: 'white',
+      paddingTop: theme.spacing(),
+      paddingBottom: theme.spacing(),
     },
-    playButton: {},
     videoProgressBar: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
+      background: theme.palette.grey[900],
+      height: 14,
       padding: 0,
+    },
+    videoProgressThumb: {
+      opacity: 0,
+    },
+    videoProgressRail: {
+      height: '100%',
+    },
+    videoProgressTrack: {
+      height: '100%',
     },
     divisor: {
       display: 'flex',
@@ -32,6 +37,12 @@ export const useStyles = makeStyles((theme) =>
     },
     volumeSlider: {
       width: 50,
+    },
+    volumeButtom: {
+      marginRight: theme.spacing(),
+    },
+    playButtom: {
+      marginRight: theme.spacing(),
     },
     fullScreenButton: {
       marginLeft: theme.spacing(2),
