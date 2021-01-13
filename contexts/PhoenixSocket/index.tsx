@@ -1,14 +1,17 @@
 import React, { createContext, FC, useEffect, useState } from 'react';
 import { Socket } from 'phoenix';
 
+import generateId from '../../common/generators/generateId';
+
 const PhoenixSocketContext = createContext({ socket: null });
 
 const PhoenixSocketProvider: FC = ({ children }) => {
   const [socket, setSocket] = useState<Socket>();
 
   useEffect(() => {
-    const socket = new Socket(process.env.NEXT_PUBLIC_WS_URL);
-    socket.connect();
+    const socket = new Socket(process.env.NEXT_PUBLIC_WS_URL, {
+      params: { user_id: `User-${generateId(6)}` },
+    });
     setSocket(socket);
   }, []);
 

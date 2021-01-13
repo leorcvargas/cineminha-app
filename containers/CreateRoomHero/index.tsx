@@ -25,7 +25,7 @@ export const CreateRoomHero: React.FC = () => {
         `${process.env.NEXT_PUBLIC_API_URL}/api/room`
       );
 
-      await router.push(`/room/${data.slug}`);
+      router.push(`/room/${data.slug}`);
     } catch (error) {
       console.error(error);
     } finally {

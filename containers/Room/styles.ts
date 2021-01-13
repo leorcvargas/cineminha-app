@@ -8,16 +8,21 @@ export const useStyles = makeStyles((theme) =>
       alignSelf: 'center',
       marginBottom: theme.spacing(4),
       width: 400,
+      background: theme.palette.grey[100],
     },
     input: {
       flex: 1,
     },
-    playerGrid: {},
-    card: {
+    playerWrapper: {
       display: 'flex',
       flexDirection: 'column-reverse',
       position: 'relative',
       paddingTop: '56.25%',
+    },
+    card: {
+      display: 'flex',
+      flexDirection: 'column',
+      flex: 3,
     },
     reactPlayer: {
       position: 'absolute',
@@ -27,6 +32,25 @@ export const useStyles = makeStyles((theme) =>
     container: {
       display: 'flex',
       flexDirection: 'column',
+    },
+    chatWrapper: {
+      display: 'flex',
+      flexDirection: 'column',
+      backgroundColor: theme.palette.grey[900],
+      color: theme.palette.grey[100],
+      flex: 1,
+      marginLeft: theme.spacing(2),
+      [theme.breakpoints.down('sm')]: {
+        marginTop: theme.spacing(2),
+        marginLeft: 0,
+      },
+    },
+    row: {
+      display: 'flex',
+      flexFlow: 'row wrap',
+      [theme.breakpoints.down('sm')]: {
+        flexFlow: 'column',
+      },
     },
   })
 );

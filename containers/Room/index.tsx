@@ -4,6 +4,7 @@ import {
   IconButton,
   InputBase,
   Paper,
+  Typography,
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import React, { FC, useState, useEffect, useRef, useMemo } from 'react';
@@ -30,10 +31,10 @@ const youtubeConfig: YouTubeConfig = {
 const Room: FC<RoomProps> = ({ slug }) => {
   const playerRef = useRef(null);
   const classes = useStyles();
-  const [channel] = useChannel(`room:${slug}`);
+  const [channel, presence] = useChannel(`room:${slug}`);
 
   const [videoURL, setVideoURL] = useState(
-    'https://www.youtube.com/watch?v=v2SjAjPD9sY'
+    'https://www.youtube.com/watch?v=W36QKRS_t5k'
   );
   const [playing, setPlaying] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
@@ -100,6 +101,10 @@ const Room: FC<RoomProps> = ({ slug }) => {
     channel.push(eventType, { time: videoProgress });
   }, [playing]);
 
+  useEffect(() => {
+    if (!presence) return;
+  }, [presence]);
+
   const onSubmit = (event: React.FormEvent<HTMLDivElement>) => {
     event.preventDefault();
     setVideoURL(event.target[0].value);
@@ -153,36 +158,46 @@ const Room: FC<RoomProps> = ({ slug }) => {
           <SearchIcon />
         </IconButton>
       </Paper>
-      <Card className={classes.card}>
-        <ReactPlayer
-          url={videoURL}
-          pip={false}
-          onProgress={onInternalPlayerProgress}
-          onPlay={onPlay}
-          onPause={onPause}
-          onDuration={setVideoDuration}
-          ref={playerRef}
-          controls={false}
-          playing={playing}
-          volume={currentVolume}
-          config={{ youtube: youtubeConfig }}
-          width="100%"
-          height="100%"
-          className={classes.reactPlayer}
-        />
-        <PlayerControls
-          toggleMute={toggleMute}
-          play={onPlay}
-          pause={onPause}
-          playing={playing}
-          videoProgress={videoProgress}
-          videoDuration={videoDuration}
-          onSeek={onSeek}
-          onSeekCommitted={onSeekCommitted}
-          onChangeVolume={onChangeVolume}
-          volume={currentVolume}
-        />
-      </Card>
+
+      <Container maxWidth="lg" className={classes.container}>
+        <div className={classes.row}>
+          <Card className={classes.card}>
+            <div className={classes.playerWrapper}>
+              <ReactPlayer
+                url={videoURL}
+                pip={false}
+                onProgress={onInternalPlayerProgress}
+                onPlay={onPlay}
+                onPause={onPause}
+                onDuration={setVideoDuration}
+                ref={playerRef}
+                controls={false}
+                playing={playing}
+                volume={currentVolume}
+                config={{ youtube: youtubeConfig }}
+                width="100%"
+                height="100%"
+                className={classes.reactPlayer}
+              />
+            </div>
+            <PlayerControls
+              toggleMute={toggleMute}
+              play={onPlay}
+              pause={onPause}
+              playing={playing}
+              videoProgress={videoProgress}
+              videoDuration={videoDuration}
+              onSeek={onSeek}
+              onSeekCommitted={onSeekCommitted}
+              onChangeVolume={onChangeVolume}
+              volume={currentVolume}
+            />
+          </Card>
+          <Paper className={classes.chatWrapper}>
+            <Typography variant="h6">Chat</Typography>
+          </Paper>
+        </div>
+      </Container>
     </Container>
   );
 };
