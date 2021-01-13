@@ -11,7 +11,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import React, { FC, useState, useEffect, useRef, useMemo } from 'react';
 import ReactPlayer, { YouTubeConfig } from 'react-player';
 
-import PlayerWrapper from '../../components/PlayerWrapper';
+import PlayerControls from '../../components/PlayerControls';
 import useChannel from '../../hooks/useChannel';
 import { useStyles } from './styles';
 
@@ -170,7 +170,7 @@ const Room: FC<RoomProps> = ({ slug }) => {
                 config={{ youtube: YOUTUBE_CONFIG }}
               />
             </CardMedia>
-            <PlayerWrapper
+            <PlayerControls
               toggleMute={toggleMute}
               play={onPlay}
               pause={onPause}

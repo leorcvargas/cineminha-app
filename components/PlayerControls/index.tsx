@@ -12,7 +12,7 @@ import React, { FC, useMemo, useState } from 'react';
 import { useStyles } from './styles';
 import getTimeLabelText from '../../common/transformers/getTimeLabelText';
 
-interface PlayerWrapperProps {
+interface PlayerControlsProps {
   playing: boolean;
   play: () => void;
   pause: () => void;
@@ -25,7 +25,7 @@ interface PlayerWrapperProps {
   volume: number;
 }
 
-const PlayerWrapper: FC<PlayerWrapperProps> = ({
+const PlayerControls: FC<PlayerControlsProps> = ({
   playing,
   play,
   pause,
@@ -139,4 +139,4 @@ const PlayerWrapper: FC<PlayerWrapperProps> = ({
   );
 };
 
-export default PlayerWrapper;
+export default PlayerControls;
