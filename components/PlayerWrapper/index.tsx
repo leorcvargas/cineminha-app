@@ -67,7 +67,7 @@ const PlayerWrapper: FC<PlayerWrapperProps> = ({
       onMouseEnter={onMouseEnterWrapper}
       onMouseLeave={onMouseLeaveWrapper}
     >
-      <div onClick={playing ? pause : play}>{children}</div>
+      {children}
 
       <div className={classes.wrapper}>
         <Fade in={showControl}>

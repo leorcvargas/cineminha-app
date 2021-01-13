@@ -7,7 +7,7 @@ import {
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import React, { FC, useState, useEffect, useRef } from 'react';
-import ReactPlayer from 'react-player';
+import ReactPlayer, { YouTubeConfig } from 'react-player';
 
 import PlayerWrapper from '../../components/PlayerWrapper';
 import useChannel from '../../hooks/useChannel';
@@ -16,6 +16,16 @@ import { useStyles } from './styles';
 interface RoomProps {
   slug: string;
 }
+
+const YOUTUBE_CONFIG: YouTubeConfig = {
+  playerVars: new Object({
+    disablekb: 1,
+    modestbranding: 1,
+    rel: 0,
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    iv_load_policy: 0,
+  }),
+};
 
 const Room: FC<RoomProps> = ({ slug }) => {
   const playerRef = useRef(null);
@@ -31,15 +41,7 @@ const Room: FC<RoomProps> = ({ slug }) => {
   const [volume, setVolume] = useState(0.5);
 
   useEffect(() => {
-    if (playerRef.current?.player.isReady) {
-      setVideoDuration(playerRef.current.getDuration());
-    }
-  }, [playerRef.current?.player?.isReady]);
-
-  useEffect(() => {
-    if (!channel) {
-      return;
-    }
+    if (!channel) return;
 
     const events = {
       videoChangeURL: `room:${slug}:video:change:url`,
@@ -50,18 +52,21 @@ const Room: FC<RoomProps> = ({ slug }) => {
 
     const videoChangeURLListener = channel.on(
       events.videoChangeURL,
-      (response) => {
-        setVideoURL(response.url);
+      (payload) => {
+        setVideoURL(payload.url);
+        setVideoProgress(0);
       }
     );
     const videoChangeTimeListener = channel.on(
       events.videoChangeTime,
-      (response) => onSeek(response.time)
+      (payload) => onSeek(payload.time)
     );
-    const videoPlayListener = channel.on(events.videoPlay, () => {
+    const videoPlayListener = channel.on(events.videoPlay, (payload) => {
+      onSeek(payload.time);
       setPlaying(true);
     });
-    const videoPauseListener = channel.on(events.videoPause, () => {
+    const videoPauseListener = channel.on(events.videoPause, (payload) => {
+      onSeek(payload.time);
       setPlaying(false);
     });
 
@@ -73,6 +78,13 @@ const Room: FC<RoomProps> = ({ slug }) => {
     };
   }, [channel]);
 
+  useEffect(() => {
+    if (!channel) return;
+
+    const eventType = playing ? 'room:video:play' : 'room:video:pause';
+    channel.push(eventType, { time: videoProgress });
+  }, [playing]);
+
   const onSubmit = (event: React.FormEvent<HTMLDivElement>) => {
     event.preventDefault();
     setVideoURL(event.target[0].value);
@@ -81,12 +93,10 @@ const Room: FC<RoomProps> = ({ slug }) => {
 
   const onPlay = () => {
     setPlaying(true);
-    channel.push('room:video:play', {});
   };
 
   const onPause = () => {
     setPlaying(false);
-    channel.push('room:video:pause', {});
   };
 
   const onInternalPlayerProgress = (state: { playedSeconds: number }) => {
@@ -101,8 +111,6 @@ const Room: FC<RoomProps> = ({ slug }) => {
   const onSeekCommitted = (time: number) => {
     channel.push('room:video:change:time', { time });
   };
-
-  const onChangeVolume = (value: number) => setVolume(value);
 
   return (
     <Container maxWidth="lg">
@@ -136,7 +144,7 @@ const Room: FC<RoomProps> = ({ slug }) => {
             videoDuration={videoDuration}
             onSeek={onSeek}
             onSeekCommitted={onSeekCommitted}
-            onChangeVolume={onChangeVolume}
+            onChangeVolume={setVolume}
             volume={volume}
           >
             <ReactPlayer
@@ -145,10 +153,12 @@ const Room: FC<RoomProps> = ({ slug }) => {
               onProgress={onInternalPlayerProgress}
               onPlay={onPlay}
               onPause={onPause}
+              onDuration={setVideoDuration}
               ref={playerRef}
               controls={false}
               playing={playing}
               volume={volume}
+              config={{ youtube: YOUTUBE_CONFIG }}
             />
           </PlayerWrapper>
         </Grid>
