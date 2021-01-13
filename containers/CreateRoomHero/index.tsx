@@ -1,6 +1,13 @@
-import { Box, Button, Container, Grid, Typography } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Grid,
+  Typography,
+} from '@material-ui/core';
 import axios from 'axios';
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 
 import { useStyles } from './styles';
@@ -8,13 +15,22 @@ import { useStyles } from './styles';
 export const CreateRoomHero: React.FC = () => {
   const router = useRouter();
   const classes = useStyles();
+  const [creatingRoom, setCreatingRoom] = useState(false);
 
   const createRoom = async () => {
-    const { data } = await axios.post<{ slug: string }>(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/room`
-    );
+    try {
+      setCreatingRoom(true);
 
-    router.push(`/room/${data.slug}`);
+      const { data } = await axios.post<{ slug: string }>(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/room`
+      );
+
+      router.push(`/room/${data.slug}`);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setCreatingRoom(false);
+    }
   };
 
   return (
@@ -35,8 +51,18 @@ export const CreateRoomHero: React.FC = () => {
           </Box>
         </Grid>
         <Grid item>
-          <Button variant="contained" color="primary" onClick={createRoom}>
-            New Room
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={createRoom}
+            disabled={creatingRoom}
+            size="large"
+          >
+            {creatingRoom ? (
+              <CircularProgress color="secondary" size={20} />
+            ) : (
+              <span>New Room</span>
+            )}
           </Button>
         </Grid>
       </Grid>

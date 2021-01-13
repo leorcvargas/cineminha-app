@@ -1,4 +1,5 @@
-import { AppBar, Grid, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Button, Grid, Toolbar, Typography } from '@material-ui/core';
+import Link from 'next/link';
 import React, { FC } from 'react';
 
 import { useStyles } from './styles';
@@ -10,9 +11,13 @@ const AppLayout: FC = ({ children }) => {
     <>
       <AppBar position="static" color="transparent" elevation={0}>
         <Toolbar>
-          <Typography variant="h6" className={classes.title}>
-            Cineminha
-          </Typography>
+          <Link href="/">
+            <Button variant="text">
+              <Typography variant="h6" className={classes.title}>
+                Cineminha
+              </Typography>
+            </Button>
+          </Link>
         </Toolbar>
       </AppBar>
       <Grid container className={classes.content}>
