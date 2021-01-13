@@ -1,8 +1,6 @@
 import {
   Card,
-  CardMedia,
   Container,
-  Grid,
   IconButton,
   InputBase,
   Paper,
@@ -19,7 +17,7 @@ interface RoomProps {
   slug: string;
 }
 
-const YOUTUBE_CONFIG: YouTubeConfig = {
+const youtubeConfig: YouTubeConfig = {
   playerVars: new Object({
     disablekb: 1,
     modestbranding: 1,
@@ -131,60 +129,53 @@ const Room: FC<RoomProps> = ({ slug }) => {
   const toggleMute = () => setMuted(!muted);
 
   return (
-    <Container maxWidth="lg">
-      <Grid
-        container
-        spacing={2}
-        justify="center"
-        alignItems="center"
-        direction="column"
+    <Container maxWidth="lg" className={classes.container}>
+      <Paper
+        component="form"
+        className={classes.inputWrapper}
+        onSubmit={onSubmit}
       >
-        <Grid item>
-          <Paper component="form" className={classes.root} onSubmit={onSubmit}>
-            <InputBase
-              id="video-url"
-              name="videoURL"
-              placeholder="YouTube Video URL"
-              color="secondary"
-              className={classes.input}
-            />
-            <IconButton type="submit">
-              <SearchIcon />
-            </IconButton>
-          </Paper>
-        </Grid>
-        <Grid item>
-          <Card>
-            <CardMedia>
-              <ReactPlayer
-                url={videoURL}
-                pip={false}
-                onProgress={onInternalPlayerProgress}
-                onPlay={onPlay}
-                onPause={onPause}
-                onDuration={setVideoDuration}
-                ref={playerRef}
-                controls={false}
-                playing={playing}
-                volume={currentVolume}
-                config={{ youtube: YOUTUBE_CONFIG }}
-              />
-            </CardMedia>
-            <PlayerControls
-              toggleMute={toggleMute}
-              play={onPlay}
-              pause={onPause}
-              playing={playing}
-              videoProgress={videoProgress}
-              videoDuration={videoDuration}
-              onSeek={onSeek}
-              onSeekCommitted={onSeekCommitted}
-              onChangeVolume={onChangeVolume}
-              volume={currentVolume}
-            />
-          </Card>
-        </Grid>
-      </Grid>
+        <InputBase
+          id="video-url"
+          name="videoURL"
+          placeholder="YouTube Video URL"
+          color="secondary"
+          className={classes.input}
+        />
+        <IconButton type="submit">
+          <SearchIcon />
+        </IconButton>
+      </Paper>
+      <Card className={classes.card}>
+        <ReactPlayer
+          url={videoURL}
+          pip={false}
+          onProgress={onInternalPlayerProgress}
+          onPlay={onPlay}
+          onPause={onPause}
+          onDuration={setVideoDuration}
+          ref={playerRef}
+          controls={false}
+          playing={playing}
+          volume={currentVolume}
+          config={{ youtube: youtubeConfig }}
+          width="100%"
+          height="100%"
+          className={classes.reactPlayer}
+        />
+        <PlayerControls
+          toggleMute={toggleMute}
+          play={onPlay}
+          pause={onPause}
+          playing={playing}
+          videoProgress={videoProgress}
+          videoDuration={videoDuration}
+          onSeek={onSeek}
+          onSeekCommitted={onSeekCommitted}
+          onChangeVolume={onChangeVolume}
+          volume={currentVolume}
+        />
+      </Card>
     </Container>
   );
 };
