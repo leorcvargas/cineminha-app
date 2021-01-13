@@ -5,8 +5,8 @@ export const useStyles = makeStyles((theme) =>
     inputWrapper: {
       padding: '4px 8px',
       display: 'flex',
-      alignItems: 'center',
-      marginBottom: theme.spacing(2),
+      alignSelf: 'center',
+      marginBottom: theme.spacing(4),
       width: 400,
     },
     input: {
