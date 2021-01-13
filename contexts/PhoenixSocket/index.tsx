@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import React, { createContext, FC, useEffect, useState } from 'react';
 import { Socket } from 'phoenix';
 
