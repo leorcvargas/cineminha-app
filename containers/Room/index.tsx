@@ -7,6 +7,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
+import PersonIcon from '@material-ui/icons/Person';
 import React, { FC, useState, useEffect, useRef, useMemo } from 'react';
 import ReactPlayer, { YouTubeConfig } from 'react-player';
 
@@ -41,6 +42,7 @@ const Room: FC<RoomProps> = ({ slug }) => {
   const [videoDuration, setVideoDuration] = useState(60);
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(0.5);
+  const [onlineUsers, setOnlineUsers] = useState(0);
 
   const currentVolume = useMemo(() => {
     if (muted) {
@@ -103,6 +105,14 @@ const Room: FC<RoomProps> = ({ slug }) => {
 
   useEffect(() => {
     if (!presence) return;
+
+    presence.onSync(() => {
+      let countOnlineUsers = 0;
+      presence.list(() => {
+        countOnlineUsers++;
+      });
+      setOnlineUsers(countOnlineUsers);
+    });
   }, [presence]);
 
   const onSubmit = (event: React.FormEvent<HTMLDivElement>) => {
@@ -194,7 +204,13 @@ const Room: FC<RoomProps> = ({ slug }) => {
             />
           </Card>
           <Paper className={classes.chatWrapper}>
-            <Typography variant="h6">Chat</Typography>
+            <div className={classes.chatHeader}>
+              <Typography variant="h6">Room Chat</Typography>
+              <Typography variant="subtitle2" className={classes.onlineUsers}>
+                <span>{onlineUsers}</span>
+                <PersonIcon fontSize="small" />
+              </Typography>
+            </div>
           </Paper>
         </div>
       </Container>
