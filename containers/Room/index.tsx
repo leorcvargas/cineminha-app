@@ -71,14 +71,11 @@ const Room: FC<RoomProps> = ({ slug }) => {
 
     const videoPlayListener = channel.on(events.videoPlay, (payload) => {
       onSeek(payload.time);
-      if (!playing) return;
       dispatch(setPlayerPlay());
     });
 
     const videoPauseListener = channel.on(events.videoPause, (payload) => {
       onSeek(payload.time);
-
-      if (playing) return;
       dispatch(setPlayerPause());
     });
 
