@@ -11,8 +11,6 @@ const useChannel = (channelName: string): [Channel, Presence] => {
   useEffect(() => {
     const phoenixChannel = socket.channel(channelName);
 
-    socket.connect();
-
     setPresence(new Presence(phoenixChannel));
 
     phoenixChannel
@@ -31,7 +29,7 @@ const useChannel = (channelName: string): [Channel, Presence] => {
     return () => {
       phoenixChannel.leave();
     };
-  }, []);
+  }, [channelName]);
 
   return [channel, presence];
 };

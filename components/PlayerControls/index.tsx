@@ -11,33 +11,49 @@ import React, { FC, useMemo, useState } from 'react';
 
 import { useStyles } from './styles';
 import getTimeLabelText from '../../common/transformers/getTimeLabelText';
+import { useDispatch, useSelector } from 'react-redux';
+import { Store } from '../../store/types';
+import {
+  setPlayerPlay,
+  setPlayerPause,
+  setPlayerMuted,
+  setPlayerVolume,
+} from '../../store/room';
 
 interface PlayerControlsProps {
-  playing: boolean;
-  play: () => void;
-  pause: () => void;
-  videoProgress: number;
-  videoDuration: number;
   onSeek: (time: number) => void;
   onSeekCommitted: (time: number) => void;
-  onChangeVolume: (value: number) => void;
-  toggleMute: () => void;
+}
+
+interface SelectedStore {
+  playing: boolean;
+  videoProgress: number;
+  videoDuration: number;
   volume: number;
+  playerMuted: boolean;
 }
 
 const PlayerControls: FC<PlayerControlsProps> = ({
-  playing,
-  play,
-  pause,
-  videoProgress,
-  videoDuration,
   onSeek,
   onSeekCommitted,
-  onChangeVolume,
-  volume,
-  toggleMute,
 }) => {
   const classes = useStyles();
+
+  const dispatch = useDispatch();
+  const {
+    playing,
+    videoDuration,
+    videoProgress,
+    volume,
+    playerMuted,
+  } = useSelector<Store, SelectedStore>(({ room }) => ({
+    playing: room.player.playing,
+    videoProgress: room.currentVideo.progress,
+    videoDuration: room.currentVideo.duration,
+    volume: room.player.muted ? 0 : room.player.volume,
+    playerMuted: room.player.muted,
+  }));
+
   const [showVolume, setShowVolume] = useState(false);
   const progressLabel = useMemo(() => getTimeLabelText(videoProgress), [
     videoProgress,
@@ -55,7 +71,16 @@ const PlayerControls: FC<PlayerControlsProps> = ({
   const onChangeCommittedProgressSlider = (_: any, value: number) =>
     onSeekCommitted(value);
 
-  const onChangeVolumeSlider = (_: any, value: number) => onChangeVolume(value);
+  const onChangeVolumeSlider = (_: any, value: number) => {
+    dispatch(setPlayerMuted(false));
+    dispatch(setPlayerVolume(value));
+  };
+
+  const play = () => dispatch(setPlayerPlay());
+
+  const pause = () => dispatch(setPlayerPause());
+
+  const toggleMute = () => dispatch(setPlayerMuted(!playerMuted));
 
   return (
     <div className={classes.wrapper}>
