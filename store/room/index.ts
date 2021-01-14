@@ -10,25 +10,29 @@ export interface RoomStore {
     volume: number;
     muted: boolean;
     playing: boolean;
+    statusBy: 'client' | 'server';
   };
   onlineUsers: number;
 }
 
+const initialState: RoomStore = {
+  currentVideo: {
+    url: 'https://www.youtube.com/watch?v=W36QKRS_t5k',
+    progress: 0,
+    duration: 10,
+  },
+  player: {
+    volume: 0.5,
+    muted: false,
+    playing: true,
+    statusBy: 'client',
+  },
+  onlineUsers: 0,
+};
+
 const roomSlice = createSlice({
   name: 'room',
-  initialState: {
-    currentVideo: {
-      url: 'https://www.youtube.com/watch?v=W36QKRS_t5k',
-      progress: 0,
-      duration: 10,
-    },
-    player: {
-      volume: 0.5,
-      muted: false,
-      playing: true,
-    },
-    onlineUsers: 0,
-  },
+  initialState,
   reducers: {
     setVideoURL: (state, action: PayloadAction<string>) => {
       state.currentVideo.url = action.payload;
@@ -46,14 +50,10 @@ const roomSlice = createSlice({
       state.player.muted = action.payload;
     },
     setPlayerPlay: (state) => {
-      if (!state.player.playing) {
-        state.player.playing = true;
-      }
+      state.player.playing = true;
     },
     setPlayerPause: (state) => {
-      if (state.player.playing) {
-        state.player.playing = false;
-      }
+      state.player.playing = false;
     },
   },
 });

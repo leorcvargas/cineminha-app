@@ -32,8 +32,8 @@ const youtubeConfig: YouTubeConfig = {
     rel: 0,
     // eslint-disable-next-line @typescript-eslint/camelcase
     iv_load_policy: 3,
+    enablejsapi: 1,
   }),
-  embedOptions: {},
 };
 
 const Player = ({ onSeekCommitted }: PlayerProps, ref) => {
@@ -69,10 +69,12 @@ const Player = ({ onSeekCommitted }: PlayerProps, ref) => {
   };
 
   const onInternalPlayerPlay = () => {
+    if (playing) return;
     dispatch(setPlayerPlay());
   };
 
   const onInternalPlayerPause = () => {
+    if (!playing) return;
     dispatch(setPlayerPause());
   };
 

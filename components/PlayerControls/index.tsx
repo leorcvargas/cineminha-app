@@ -76,9 +76,15 @@ const PlayerControls: FC<PlayerControlsProps> = ({
     dispatch(setPlayerVolume(value));
   };
 
-  const play = () => dispatch(setPlayerPlay());
+  const play = () => {
+    if (playing) return;
+    dispatch(setPlayerPlay());
+  };
 
-  const pause = () => dispatch(setPlayerPause());
+  const pause = () => {
+    if (!playing) return;
+    dispatch(setPlayerPause());
+  };
 
   const toggleMute = () => dispatch(setPlayerMuted(!playerMuted));
 
