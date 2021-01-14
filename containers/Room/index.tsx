@@ -19,7 +19,7 @@ import {
   setServerPlay,
   setServerPause,
 } from '../../store/room';
-import Player from '../../components/Player';
+import Player from '../Player';
 
 interface RoomProps {
   slug: string;
