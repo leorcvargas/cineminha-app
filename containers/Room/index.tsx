@@ -1,13 +1,6 @@
-import {
-  Container,
-  IconButton,
-  InputBase,
-  Paper,
-  Typography,
-} from '@material-ui/core';
+import { Container, IconButton, InputBase, Paper } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
-import PersonIcon from '@material-ui/icons/Person';
-import React, { FC, useState, useEffect, useRef } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import useChannel from '../../hooks/useChannel';
@@ -18,8 +11,10 @@ import {
   setVideoProgress,
   setServerPlay,
   setServerPause,
+  setRoomOnlineUsers,
 } from '../../store/room';
 import Player from '../Player';
+import RoomChat from '../RoomChat';
 
 interface RoomProps {
   slug: string;
@@ -46,8 +41,6 @@ const Room: FC<RoomProps> = ({ slug }) => {
   const dispatch = useDispatch();
 
   const [channel, presence] = useChannel(`room:${slug}`);
-
-  const [onlineUsers, setOnlineUsers] = useState(0);
 
   useEffect(() => {
     if (!channel) return;
@@ -107,7 +100,7 @@ const Room: FC<RoomProps> = ({ slug }) => {
       presence.list(() => {
         countOnlineUsers++;
       });
-      setOnlineUsers(countOnlineUsers);
+      dispatch(setRoomOnlineUsers(countOnlineUsers));
     });
   }, [presence]);
 
@@ -149,15 +142,7 @@ const Room: FC<RoomProps> = ({ slug }) => {
         <div className={classes.row}>
           <Player onSeekCommitted={onSeekCommitted} ref={playerRef} />
 
-          <Paper className={classes.chatWrapper}>
-            <div className={classes.chatHeader}>
-              <Typography variant="h6">Room Chat</Typography>
-              <Typography variant="subtitle2" className={classes.onlineUsers}>
-                <span>{onlineUsers}</span>
-                <PersonIcon fontSize="small" />
-              </Typography>
-            </div>
-          </Paper>
+          <RoomChat />
         </div>
       </Container>
     </Container>

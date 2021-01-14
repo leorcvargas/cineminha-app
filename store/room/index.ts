@@ -65,6 +65,9 @@ const roomSlice = createSlice({
       state.player.playing = false;
       state.player.statusBy = 'server';
     },
+    setRoomOnlineUsers: (state, action: PayloadAction<number>) => {
+      state.onlineUsers = action.payload;
+    },
   },
 });
 
@@ -78,6 +81,7 @@ export const {
   setVideoDuration,
   setVideoProgress,
   setVideoURL,
+  setRoomOnlineUsers,
 } = roomSlice.actions;
 
 export const { reducer } = roomSlice;
