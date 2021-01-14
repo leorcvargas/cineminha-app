@@ -14,10 +14,10 @@ import useChannel from '../../hooks/useChannel';
 import { useStyles } from './styles';
 import { Store } from '../../store/types';
 import {
-  setPlayerPlay,
-  setPlayerPause,
   setVideoURL,
   setVideoProgress,
+  setServerPlay,
+  setServerPause,
 } from '../../store/room';
 import Player from '../../components/Player';
 
@@ -28,18 +28,21 @@ interface RoomProps {
 interface SelectedStore {
   playing: boolean;
   videoProgress: number;
+  playStatusBy: 'client' | 'server';
 }
 
 const Room: FC<RoomProps> = ({ slug }) => {
   const playerRef = useRef(null);
   const classes = useStyles();
 
-  const { playing, videoProgress } = useSelector<Store, SelectedStore>(
-    (state) => ({
-      playing: state.room.player.playing,
-      videoProgress: state.room.currentVideo.progress,
-    })
-  );
+  const { playing, videoProgress, playStatusBy } = useSelector<
+    Store,
+    SelectedStore
+  >((state) => ({
+    playing: state.room.player.playing,
+    videoProgress: state.room.currentVideo.progress,
+    playStatusBy: state.room.player.statusBy,
+  }));
   const dispatch = useDispatch();
 
   const [channel, presence] = useChannel(`room:${slug}`);
@@ -71,12 +74,12 @@ const Room: FC<RoomProps> = ({ slug }) => {
 
     const videoPlayListener = channel.on(events.videoPlay, (payload) => {
       onSeek(payload.time);
-      dispatch(setPlayerPlay());
+      dispatch(setServerPlay());
     });
 
     const videoPauseListener = channel.on(events.videoPause, (payload) => {
       onSeek(payload.time);
-      dispatch(setPlayerPause());
+      dispatch(setServerPause());
     });
 
     return () => {
@@ -90,8 +93,10 @@ const Room: FC<RoomProps> = ({ slug }) => {
   useEffect(() => {
     if (!channel) return;
 
-    const eventType = playing ? 'room:video:play' : 'room:video:pause';
-    channel.push(eventType, { time: videoProgress });
+    if (playStatusBy === 'client') {
+      const eventType = playing ? 'room:video:play' : 'room:video:pause';
+      channel.push(eventType, { time: videoProgress });
+    }
   }, [playing]);
 
   useEffect(() => {

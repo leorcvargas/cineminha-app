@@ -51,9 +51,19 @@ const roomSlice = createSlice({
     },
     setPlayerPlay: (state) => {
       state.player.playing = true;
+      state.player.statusBy = 'client';
     },
     setPlayerPause: (state) => {
       state.player.playing = false;
+      state.player.statusBy = 'client';
+    },
+    setServerPlay: (state) => {
+      state.player.playing = true;
+      state.player.statusBy = 'server';
+    },
+    setServerPause: (state) => {
+      state.player.playing = false;
+      state.player.statusBy = 'server';
     },
   },
 });
@@ -62,6 +72,8 @@ export const {
   setPlayerMuted,
   setPlayerPlay,
   setPlayerPause,
+  setServerPlay,
+  setServerPause,
   setPlayerVolume,
   setVideoDuration,
   setVideoProgress,
