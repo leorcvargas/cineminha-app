@@ -1,9 +1,12 @@
 /* eslint-disable no-console */
 import { Channel, Presence } from 'phoenix';
 import { useState, useContext, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { PhoenixSocketContext } from '../contexts/PhoenixSocket';
+import { loadVideos } from '../store/room';
 
 const useChannel = (channelName: string): [Channel, Presence] => {
+  const dispatch = useDispatch();
   const [channel, setChannel] = useState<Channel>();
   const [presence, setPresence] = useState<Presence>();
   const { socket } = useContext(PhoenixSocketContext);
@@ -18,6 +21,7 @@ const useChannel = (channelName: string): [Channel, Presence] => {
       .receive('ok', (event) => {
         console.log('Successfuly joined', event);
         setChannel(phoenixChannel);
+        dispatch(loadVideos(event['room_videos']));
       })
       .receive('error', (event) => {
         console.log('Failed to join', event);

@@ -31,9 +31,17 @@ export interface RoomUserState {
   name: string;
 }
 
+export interface RoomVideoState {
+  id: number;
+  url: string;
+  roomId: string;
+  inserted_at: Date;
+}
+
 export interface RoomStore {
   user: RoomUserState;
   currentVideo: CurrentVideoState;
+  videos: RoomVideoState[];
   player: PlayerState;
   chat: ChatState;
   onlineUsers: RoomUserState[];
@@ -46,10 +54,11 @@ const initialState: RoomStore = {
     color: generateRandomColor(),
   },
   currentVideo: {
-    url: 'https://www.youtube.com/watch?v=W36QKRS_t5k',
+    url: '',
     progress: 0,
     duration: 10,
   },
+  videos: [],
   player: {
     volume: 0.5,
     muted: false,
@@ -68,6 +77,16 @@ const roomSlice = createSlice({
   reducers: {
     setVideoURL: (state, action: PayloadAction<string>) => {
       state.currentVideo.url = action.payload;
+    },
+    setVideos: (state, action: PayloadAction<RoomVideoState[]>) => {
+      state.videos = action.payload;
+    },
+    loadVideos: (state, action: PayloadAction<RoomVideoState[]>) => {
+      state.videos = action.payload;
+      const [firstVideo] = action.payload;
+      state.currentVideo.url = firstVideo?.url;
+      state.player.playing = false;
+      state.player.statusBy = 'client';
     },
     setVideoProgress: (state, action: PayloadAction<number>) => {
       state.currentVideo.progress = action.payload;
@@ -156,6 +175,8 @@ export const {
   resetOnlineUsers,
   setUserColor,
   setUserName,
+  setVideos,
+  loadVideos,
 } = roomSlice.actions;
 
 export const { reducer } = roomSlice;

@@ -1,4 +1,5 @@
 import { Card } from '@material-ui/core';
+import Skeleton from '@material-ui/lab/Skeleton';
 import React, {
   forwardRef,
   useEffect,
@@ -67,7 +68,7 @@ const Player = ({ onSeekCommitted }: PlayerProps, ref) => {
   }, [playerVolume, playerMuted]);
 
   useImperativeHandle(ref, () => ({
-    seekTo: (time: number) => playerRef.current.seekTo(time),
+    seekTo: (time: number) => playerRef.current?.seekTo(time),
   }));
 
   useEffect(() => {
@@ -96,30 +97,39 @@ const Player = ({ onSeekCommitted }: PlayerProps, ref) => {
     dispatch(setVideoDuration(duration));
 
   const onSeekPlayerControl = (time: number) => {
-    playerRef.current.seekTo(time);
+    playerRef.current?.seekTo(time);
     dispatch(setVideoProgress(time));
   };
 
   return (
     <Card className={classes.card}>
       <div className={classes.playerWrapper}>
-        <ReactPlayer
-          url={currentVideoURL}
-          pip={false}
-          onProgress={onInternalPlayerProgress}
-          onDuration={onPlayerDuration}
-          onPlay={onInternalPlayerPlay}
-          onPause={onInternalPlayerPause}
-          ref={playerRef}
-          controls={false}
-          playing={playing}
-          volume={currentVolume}
-          config={{ youtube: youtubeConfig }}
-          width="100%"
-          height="100%"
-          className={classes.reactPlayer}
-        />
+        {currentVideoURL ? (
+          <ReactPlayer
+            url={currentVideoURL}
+            pip={false}
+            onProgress={onInternalPlayerProgress}
+            onDuration={onPlayerDuration}
+            onPlay={onInternalPlayerPlay}
+            onPause={onInternalPlayerPause}
+            ref={playerRef}
+            controls={false}
+            playing={playing}
+            volume={currentVolume}
+            config={{ youtube: youtubeConfig }}
+            width="100%"
+            height="100%"
+            className={classes.reactPlayer}
+          />
+        ) : (
+          <Skeleton
+            animation="wave"
+            variant="rect"
+            className={classes.reactPlayerSkeleton}
+          />
+        )}
       </div>
+
       <PlayerControls
         onSeek={onSeekPlayerControl}
         onSeekCommitted={onSeekCommitted}

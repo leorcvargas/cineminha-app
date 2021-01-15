@@ -18,5 +18,12 @@ export const useStyles = makeStyles((_theme) =>
       left: 0,
       top: 0,
     },
+    reactPlayerSkeleton: {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      width: '100%',
+      height: '100%',
+    },
   })
 );

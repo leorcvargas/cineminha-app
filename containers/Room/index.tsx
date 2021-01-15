@@ -17,6 +17,7 @@ import {
   resetOnlineUsers,
   RoomUserState,
   setUserName,
+  setVideos,
 } from '../../store/room';
 import Player from '../Player';
 import RoomChat from '../RoomChat';
@@ -68,7 +69,7 @@ const Room: FC<RoomProps> = ({ slug }) => {
   };
 
   const onSeek = (time: number) => {
-    playerRef.current.seekTo(time);
+    playerRef.current?.seekTo(time);
   };
 
   const onSeekCommitted = (time: number) =>
@@ -84,32 +85,40 @@ const Room: FC<RoomProps> = ({ slug }) => {
     const listeners = [
       {
         event: `room:${slug}:video:change:url`,
-        handler: (payload) => {
-          dispatch(setVideoURL(payload.url));
+        handler: (payload: any) => {
+          const sanitizedVideos = payload.room_videos.map((roomVideo) => ({
+            id: roomVideo.id,
+            insertedAt: roomVideo['inserted_at'],
+            roomId: roomVideo['room_id'],
+            url: roomVideo.url,
+          }));
+
+          dispatch(setVideos(sanitizedVideos));
           dispatch(setVideoProgress(0));
+          dispatch(setVideoURL(sanitizedVideos[0].url));
         },
       },
       {
         event: `room:${slug}:video:change:time`,
-        handler: (payload) => onSeek(payload.time),
+        handler: (payload: any) => onSeek(payload.time),
       },
       {
         event: `room:${slug}:video:play`,
-        handler: (payload) => {
+        handler: (payload: any) => {
           onSeek(payload.time);
           dispatch(setServerPlay());
         },
       },
       {
         event: `room:${slug}:video:pause`,
-        handler: (payload) => {
+        handler: (payload: any) => {
           onSeek(payload.time);
           dispatch(setServerPause());
         },
       },
       {
         event: `room:${slug}:chat:new:message`,
-        handler: (payload) =>
+        handler: (payload: any) =>
           dispatch(
             appendRoomChatMessage({
               userName: payload['user_name'],
@@ -134,7 +143,6 @@ const Room: FC<RoomProps> = ({ slug }) => {
   useEffect(() => {
     if (!channel) return;
     const params = (channel as any).socket.params();
-
     dispatch(setUserName(params['user_name']));
     dispatch(setUserId(params['user_id']));
   }, [channel]);
@@ -152,13 +160,16 @@ const Room: FC<RoomProps> = ({ slug }) => {
     presence?.onSync(() => {
       const onlineUsers: RoomUserState[] = [];
 
-      presence.list((key: string, { metas: [userData] }) =>
+      presence.list((key: string, payload: any) => {
+        const {
+          metas: [userData],
+        } = payload;
         onlineUsers.push({
           id: key,
-          name: userData.user_name ?? '',
-          color: userData.user_color ?? '',
-        })
-      );
+          name: userData.user_name,
+          color: userData.user_color,
+        });
+      });
 
       dispatch(setRoomOnlineUsers(onlineUsers));
     });
