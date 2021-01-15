@@ -40,15 +40,19 @@ const RoomChat: FC<RoomChatProps> = ({ sendChatMessage }) => {
     event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
   ) => setMessage(event.target.value);
 
+  const validateMessageLength = (message: string) => message.length < 300;
+
+  const validateMessageEmpty = (message: string) => !!message.trim().length;
+
   const onSubmitMessage = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!message.trim().length) {
+    if (!validateMessageEmpty(message)) {
       setMessageInputError("Can't be empty");
       return;
     }
 
-    if (message.length >= 300) {
+    if (!validateMessageLength(message)) {
       setMessageInputError('Maximum length is 300');
       return;
     }
