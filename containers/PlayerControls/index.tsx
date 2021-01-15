@@ -4,6 +4,7 @@ import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
 import VolumeMuteIcon from '@material-ui/icons/VolumeMute';
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
+import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import PauseIcon from '@material-ui/icons/Pause';
 import Fade from '@material-ui/core/Fade';
 import Slider from '@material-ui/core/Slider';
@@ -23,6 +24,7 @@ import {
 interface PlayerControlsProps {
   onSeek: (time: number) => void;
   onSeekCommitted: (time: number) => void;
+  handleFullscreen: () => void;
 }
 
 interface SelectedStore {
@@ -31,11 +33,13 @@ interface SelectedStore {
   videoDuration: number;
   volume: number;
   playerMuted: boolean;
+  fullscreen: boolean;
 }
 
 const PlayerControls: FC<PlayerControlsProps> = ({
   onSeek,
   onSeekCommitted,
+  handleFullscreen,
 }) => {
   const classes = useStyles();
 
@@ -46,12 +50,14 @@ const PlayerControls: FC<PlayerControlsProps> = ({
     videoProgress,
     volume,
     playerMuted,
+    fullscreen,
   } = useSelector<Store, SelectedStore>(({ room }) => ({
     playing: room.player.playing,
     videoProgress: room.currentVideo.progress,
     videoDuration: room.currentVideo.duration,
     volume: room.player.muted ? 0 : room.player.volume,
     playerMuted: room.player.muted,
+    fullscreen: room.player.fullscreen,
   }));
 
   const [showVolume, setShowVolume] = useState(false);
@@ -161,8 +167,9 @@ const PlayerControls: FC<PlayerControlsProps> = ({
             edge="end"
             color="inherit"
             className={classes.fullScreenButton}
+            onClick={handleFullscreen}
           >
-            <FullscreenIcon />
+            {!fullscreen ? <FullscreenIcon /> : <FullscreenExitIcon />}
           </IconButton>
         </div>
       </Toolbar>

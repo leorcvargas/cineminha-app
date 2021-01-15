@@ -12,6 +12,7 @@ export interface PlayerState {
   muted: boolean;
   playing: boolean;
   statusBy: 'client' | 'server';
+  fullscreen: boolean;
 }
 
 export interface ChatMessage {
@@ -64,6 +65,7 @@ const initialState: RoomStore = {
     muted: false,
     playing: false,
     statusBy: 'client',
+    fullscreen: false,
   },
   chat: {
     messages: [],
@@ -136,6 +138,9 @@ const roomSlice = createSlice({
     setRandomUserColor: (state) => {
       state.user.color = generateRandomColor();
     },
+    setFullscreen: (state, action: PayloadAction<boolean>) => {
+      state.player.fullscreen = action.payload;
+    },
     resetChat: (state) => {
       state.chat = { ...initialState.chat };
     },
@@ -177,6 +182,7 @@ export const {
   setUserName,
   setVideos,
   loadVideos,
+  setFullscreen,
 } = roomSlice.actions;
 
 export const { reducer } = roomSlice;

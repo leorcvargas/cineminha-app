@@ -4,6 +4,7 @@ import React, {
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
 } from 'react';
@@ -15,6 +16,7 @@ import {
   setVideoDuration,
   resetPlayer,
   resetCurrentVideo,
+  setFullscreen,
 } from '../../store/room';
 
 import PlayerControls from '../PlayerControls';
@@ -25,6 +27,7 @@ interface SelectedStore {
   playerVolume: number;
   currentVideoURL: string;
   playing: boolean;
+  fullscreen: boolean;
 }
 
 interface PlayerProps {
@@ -44,16 +47,21 @@ const youtubeConfig: YouTubeConfig = {
 const Player = ({ onSeekCommitted }: PlayerProps, ref) => {
   const classes = useStyles();
   const playerRef = useRef(null);
-  const { playerMuted, playerVolume, currentVideoURL, playing } = useSelector<
-    Store,
-    SelectedStore
-  >((state) => ({
+  const {
+    playerMuted,
+    playerVolume,
+    currentVideoURL,
+    playing,
+    fullscreen,
+  } = useSelector<Store, SelectedStore>((state) => ({
     playerMuted: state.room.player.muted,
     playerVolume: state.room.player.volume,
     currentVideoURL: state.room.currentVideo.url,
     playing: state.room.player.playing,
+    fullscreen: state.room.player.fullscreen,
   }));
   const dispatch = useDispatch();
+  const fsRef = useRef(null);
 
   const currentVolume = useMemo(() => {
     if (playerMuted) {
@@ -62,17 +70,6 @@ const Player = ({ onSeekCommitted }: PlayerProps, ref) => {
 
     return playerVolume;
   }, [playerVolume, playerMuted]);
-
-  useImperativeHandle(ref, () => ({
-    seekTo: (time: number) => playerRef.current?.seekTo(time),
-  }));
-
-  useEffect(() => {
-    return () => {
-      dispatch(resetPlayer());
-      dispatch(resetCurrentVideo());
-    };
-  }, []);
 
   const onInternalPlayerProgress = (state: { playedSeconds: number }) => {
     const { playedSeconds } = state;
@@ -87,9 +84,38 @@ const Player = ({ onSeekCommitted }: PlayerProps, ref) => {
     dispatch(setVideoProgress(time));
   };
 
+  const onFullscreen = () => {
+    if (!fsRef.current) return;
+
+    if (!fullscreen) {
+      fsRef.current?.requestFullscreen();
+      dispatch(setFullscreen(true));
+    } else {
+      document.exitFullscreen();
+      dispatch(setFullscreen(false));
+    }
+  };
+
+  useImperativeHandle(ref, () => ({
+    seekTo: (time: number) => playerRef.current?.seekTo(time),
+  }));
+
+  useEffect(() => {
+    return () => {
+      dispatch(resetPlayer());
+      dispatch(resetCurrentVideo());
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!document.fullscreenElement) {
+      setFullscreen(false);
+    }
+  });
+
   return (
     <Card className={classes.card}>
-      <div className={classes.playerWrapper}>
+      <div className={classes.playerWrapper} ref={fsRef}>
         <ReactPlayer
           url={currentVideoURL}
           pip={false}
@@ -113,12 +139,12 @@ const Player = ({ onSeekCommitted }: PlayerProps, ref) => {
             className={classes.reactPlayerSkeleton}
           />
         )}
+        <PlayerControls
+          onSeek={onSeekPlayerControl}
+          onSeekCommitted={onSeekCommitted}
+          handleFullscreen={onFullscreen}
+        />
       </div>
-
-      <PlayerControls
-        onSeek={onSeekPlayerControl}
-        onSeekCommitted={onSeekCommitted}
-      />
     </Card>
   );
 };
