@@ -12,13 +12,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Store } from '../../store/types';
 import {
   setVideoProgress,
-  // setPlayerPlay,
-  // setPlayerPause,
   setVideoDuration,
   resetPlayer,
   resetCurrentVideo,
-  setPlayerPlay,
-  setPlayerPause,
 } from '../../store/room';
 
 import PlayerControls from '../PlayerControls';
@@ -83,14 +79,6 @@ const Player = ({ onSeekCommitted }: PlayerProps, ref) => {
     dispatch(setVideoProgress(playedSeconds));
   };
 
-  const onInternalPlayerPlay = () => {
-    dispatch(setPlayerPlay());
-  };
-
-  const onInternalPlayerPause = () => {
-    dispatch(setPlayerPause());
-  };
-
   const onPlayerDuration = (duration: number) =>
     dispatch(setVideoDuration(duration));
 
@@ -107,8 +95,6 @@ const Player = ({ onSeekCommitted }: PlayerProps, ref) => {
           pip={false}
           onProgress={onInternalPlayerProgress}
           onDuration={onPlayerDuration}
-          onPlay={onInternalPlayerPlay}
-          onPause={onInternalPlayerPause}
           stopOnUnmount
           ref={playerRef}
           controls={false}
