@@ -52,7 +52,10 @@ const Room: FC<RoomProps> = ({ slug }) => {
     userColor: state.room.user.color,
   }));
   const dispatch = useDispatch();
-  const previousUserData = usePrevious({ userName, userColor });
+  const { userColor: prevUserColor, userName: prevUserName } = usePrevious({
+    userName,
+    userColor,
+  });
 
   const onSubmit = (event: React.FormEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -74,71 +77,66 @@ const Room: FC<RoomProps> = ({ slug }) => {
   const sendChatMessage = (message: string) =>
     channel.push('room:chat:new:message', { message });
 
+  /**
+   * Room Channel event handlers
+   */
   useEffect(() => {
-    if (!channel) return;
+    const listeners = [
+      {
+        event: `room:${slug}:video:change:url`,
+        handler: (payload) => {
+          dispatch(setVideoURL(payload.url));
+          dispatch(setVideoProgress(0));
+        },
+      },
+      {
+        event: `room:${slug}:video:change:time`,
+        handler: (payload) => onSeek(payload.time),
+      },
+      {
+        event: `room:${slug}:video:play`,
+        handler: (payload) => {
+          onSeek(payload.time);
+          dispatch(setServerPlay());
+        },
+      },
+      {
+        event: `room:${slug}:video:pause`,
+        handler: (payload) => {
+          onSeek(payload.time);
+          dispatch(setServerPause());
+        },
+      },
+      {
+        event: `room:${slug}:chat:new:message`,
+        handler: (payload) =>
+          dispatch(
+            appendRoomChatMessage({
+              userName: payload['user_name'],
+              userColor: payload['user_color'],
+              sentAt: payload['sent_at'],
+              message: payload['message'],
+            })
+          ),
+      },
+    ];
 
-    const params = (channel as any).socket.params();
-    dispatch(setUserName(params['user_name']));
-    dispatch(setUserId(params['user_id']));
-
-    const events = {
-      videoChangeURL: `room:${slug}:video:change:url`,
-      videoChangeTime: `room:${slug}:video:change:time`,
-      videoPlay: `room:${slug}:video:play`,
-      videoPause: `room:${slug}:video:pause`,
-      chatNewMessage: `room:${slug}:chat:new:message`,
-    };
-
-    const videoChangeURLListener = channel.on(
-      events.videoChangeURL,
-      (payload) => {
-        dispatch(setVideoURL(payload.url));
-        dispatch(setVideoProgress(0));
-      }
-    );
-
-    const videoChangeTimeListener = channel.on(
-      events.videoChangeTime,
-      (payload) => onSeek(payload.time)
-    );
-
-    const videoPlayListener = channel.on(events.videoPlay, (payload) => {
-      onSeek(payload.time);
-      dispatch(setServerPlay());
+    const listenersIds = listeners.map(({ event, handler }) => {
+      const id = channel?.on(event, handler);
+      return [event, id] as [string, number];
     });
-
-    const videoPauseListener = channel.on(events.videoPause, (payload) => {
-      onSeek(payload.time);
-      dispatch(setServerPause());
-    });
-
-    const chatNewMessageListener = channel.on(
-      events.chatNewMessage,
-      (payload) => {
-        const {
-          user_name: userName,
-          user_color: userColor,
-          message,
-          sent_at: sentAt,
-        } = payload;
-
-        const actionPayload = {
-          userName: userName,
-          userColor,
-          sentAt,
-          message,
-        };
-        dispatch(appendRoomChatMessage(actionPayload));
-      }
-    );
 
     return () => {
-      channel.off(events.videoChangeURL, videoChangeURLListener);
-      channel.off(events.videoChangeTime, videoChangeTimeListener);
-      channel.off(events.videoPlay, videoPlayListener);
-      channel.off(events.videoPause, videoPauseListener);
-      channel.off(events.chatNewMessage, chatNewMessageListener);
+      listenersIds.forEach((listenerId) => channel?.off(...listenerId));
     };
+  }, [channel]);
+
+  useEffect(() => {
+    if (!channel) return;
+    const params = (channel as any).socket.params();
+
+    dispatch(setUserName(params['user_name']));
+    dispatch(setUserId(params['user_id']));
   }, [channel]);
 
   useEffect(() => {
@@ -151,18 +149,16 @@ const Room: FC<RoomProps> = ({ slug }) => {
   }, [playing, channel]);
 
   useEffect(() => {
-    if (!presence) return;
-
-    presence.onSync(() => {
+    presence?.onSync(() => {
       const onlineUsers: RoomUserState[] = [];
 
-      presence.list((key: string, { metas: [userData] }) => {
+      presence.list((key: string, { metas: [userData] }) =>
         onlineUsers.push({
           id: key,
           name: userData.user_name ?? '',
           color: userData.user_color ?? '',
-        });
-      });
+        })
+      );
 
       dispatch(setRoomOnlineUsers(onlineUsers));
     });
@@ -173,21 +169,14 @@ const Room: FC<RoomProps> = ({ slug }) => {
   }, [presence]);
 
   useEffect(() => {
-    if (!channel) return;
-
-    if (userName !== previousUserData.userName && !!previousUserData.userName) {
-      channel.push('room:user:set:name', { name: userName });
+    if (userName !== prevUserName && !!prevUserName) {
+      channel?.push('room:user:set:name', { name: userName });
     }
   }, [channel, userName]);
 
   useEffect(() => {
-    if (!channel) return;
-
-    if (
-      userColor !== previousUserData.userColor &&
-      !!previousUserData.userColor
-    ) {
-      channel.push('room:user:set:color', { color: userColor });
+    if (userColor !== prevUserColor && !!prevUserColor) {
+      channel?.push('room:user:set:color', { color: userColor });
     }
   }, [channel, userColor]);
 
