@@ -12,11 +12,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Store } from '../../store/types';
 import {
   setVideoProgress,
-  setPlayerPlay,
-  setPlayerPause,
+  // setPlayerPlay,
+  // setPlayerPause,
   setVideoDuration,
   resetPlayer,
   resetCurrentVideo,
+  setPlayerPlay,
+  setPlayerPause,
 } from '../../store/room';
 
 import PlayerControls from '../PlayerControls';
@@ -36,12 +38,10 @@ interface PlayerProps {
 const youtubeConfig: YouTubeConfig = {
   playerVars: new Object({
     disablekb: 1,
-    autoplay: 1,
     modestbranding: 1,
     rel: 0,
     // eslint-disable-next-line @typescript-eslint/camelcase
     iv_load_policy: 3,
-    enablejsapi: 1,
   }),
 };
 
@@ -84,12 +84,10 @@ const Player = ({ onSeekCommitted }: PlayerProps, ref) => {
   };
 
   const onInternalPlayerPlay = () => {
-    if (playing) return;
     dispatch(setPlayerPlay());
   };
 
   const onInternalPlayerPause = () => {
-    if (!playing) return;
     dispatch(setPlayerPause());
   };
 
@@ -104,24 +102,25 @@ const Player = ({ onSeekCommitted }: PlayerProps, ref) => {
   return (
     <Card className={classes.card}>
       <div className={classes.playerWrapper}>
-        {currentVideoURL ? (
-          <ReactPlayer
-            url={currentVideoURL}
-            pip={false}
-            onProgress={onInternalPlayerProgress}
-            onDuration={onPlayerDuration}
-            onPlay={onInternalPlayerPlay}
-            onPause={onInternalPlayerPause}
-            ref={playerRef}
-            controls={false}
-            playing={playing}
-            volume={currentVolume}
-            config={{ youtube: youtubeConfig }}
-            width="100%"
-            height="100%"
-            className={classes.reactPlayer}
-          />
-        ) : (
+        <ReactPlayer
+          url={currentVideoURL}
+          pip={false}
+          onProgress={onInternalPlayerProgress}
+          onDuration={onPlayerDuration}
+          onPlay={onInternalPlayerPlay}
+          onPause={onInternalPlayerPause}
+          stopOnUnmount
+          ref={playerRef}
+          controls={false}
+          playing={playing}
+          volume={currentVolume}
+          config={{ youtube: youtubeConfig }}
+          width="100%"
+          height="100%"
+          className={classes.reactPlayer}
+        />
+        <div className={classes.reactPlayerSkeleton} />
+        {!currentVideoURL && (
           <Skeleton
             animation="wave"
             variant="rect"

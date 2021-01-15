@@ -62,7 +62,7 @@ const initialState: RoomStore = {
   player: {
     volume: 0.5,
     muted: false,
-    playing: true,
+    playing: false,
     statusBy: 'client',
   },
   chat: {

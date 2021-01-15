@@ -82,6 +82,8 @@ const Room: FC<RoomProps> = ({ slug }) => {
    * Room Channel event handlers
    */
   useEffect(() => {
+    if (!channel) return;
+
     const listeners = [
       {
         event: `room:${slug}:video:change:url`,
@@ -105,15 +107,15 @@ const Room: FC<RoomProps> = ({ slug }) => {
       {
         event: `room:${slug}:video:play`,
         handler: (payload: any) => {
-          onSeek(payload.time);
           dispatch(setServerPlay());
+          onSeek(payload.time);
         },
       },
       {
         event: `room:${slug}:video:pause`,
         handler: (payload: any) => {
-          onSeek(payload.time);
           dispatch(setServerPause());
+          onSeek(payload.time);
         },
       },
       {
