@@ -1,5 +1,11 @@
 import { Card } from '@material-ui/core';
-import React, { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from 'react';
 import ReactPlayer, { YouTubeConfig } from 'react-player';
 import { useDispatch, useSelector } from 'react-redux';
 import { Store } from '../../store/types';
@@ -8,6 +14,8 @@ import {
   setPlayerPlay,
   setPlayerPause,
   setVideoDuration,
+  resetPlayer,
+  resetCurrentVideo,
 } from '../../store/room';
 
 import PlayerControls from '../PlayerControls';
@@ -39,11 +47,6 @@ const youtubeConfig: YouTubeConfig = {
 const Player = ({ onSeekCommitted }: PlayerProps, ref) => {
   const classes = useStyles();
   const playerRef = useRef(null);
-
-  useImperativeHandle(ref, () => ({
-    seekTo: (time: number) => playerRef.current.seekTo(time),
-  }));
-
   const { playerMuted, playerVolume, currentVideoURL, playing } = useSelector<
     Store,
     SelectedStore
@@ -62,6 +65,17 @@ const Player = ({ onSeekCommitted }: PlayerProps, ref) => {
 
     return playerVolume;
   }, [playerVolume, playerMuted]);
+
+  useImperativeHandle(ref, () => ({
+    seekTo: (time: number) => playerRef.current.seekTo(time),
+  }));
+
+  useEffect(() => {
+    return () => {
+      dispatch(resetPlayer());
+      dispatch(resetCurrentVideo());
+    };
+  }, []);
 
   const onInternalPlayerProgress = (state: { playedSeconds: number }) => {
     const { playedSeconds } = state;

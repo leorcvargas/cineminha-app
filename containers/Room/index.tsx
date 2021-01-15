@@ -14,6 +14,7 @@ import {
   setRoomOnlineUsers,
   setUserId,
   appendRoomChatMessage,
+  resetOnlineUsers,
 } from '../../store/room';
 import Player from '../Player';
 import RoomChat from '../RoomChat';
@@ -130,6 +131,13 @@ const Room: FC<RoomProps> = ({ slug }) => {
       dispatch(setRoomOnlineUsers(countOnlineUsers));
     });
   }, [presence]);
+
+  useEffect(
+    () => () => {
+      dispatch(resetOnlineUsers());
+    },
+    []
+  );
 
   const onSubmit = (event: React.FormEvent<HTMLDivElement>) => {
     event.preventDefault();

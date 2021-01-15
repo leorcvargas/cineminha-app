@@ -10,7 +10,9 @@ const PhoenixSocketContext = createContext({ socket: null });
 
 const PhoenixSocketProvider: FC = ({ children }) => {
   const [socket, setSocket] = useState<Socket>();
-  const userColor = useSelector<Store, string>((state) => state.room.userColor);
+  const userColor = useSelector<Store, string>(
+    (state) => state.room.user.color
+  );
 
   useEffect(() => {
     const socket = new Socket(process.env.NEXT_PUBLIC_WS_URL, {

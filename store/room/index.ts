@@ -24,9 +24,14 @@ export interface ChatMessage {
 export interface ChatState {
   messages: Array<ChatMessage>;
 }
+
+export interface RoomUserState {
+  id: string;
+  color: string;
+}
+
 export interface RoomStore {
-  userId: string;
-  userColor: string;
+  user: RoomUserState;
   currentVideo: CurrentVideoState;
   player: PlayerState;
   chat: ChatState;
@@ -34,8 +39,10 @@ export interface RoomStore {
 }
 
 const initialState: RoomStore = {
-  userId: '',
-  userColor: generateRandomColor(),
+  user: {
+    id: '',
+    color: generateRandomColor(),
+  },
   currentVideo: {
     url: 'https://www.youtube.com/watch?v=W36QKRS_t5k',
     progress: 0,
@@ -97,10 +104,25 @@ const roomSlice = createSlice({
       state.chat.messages = [...currentMessages, action.payload];
     },
     setUserId: (state, action: PayloadAction<string>) => {
-      state.userId = action.payload;
+      state.user.id = action.payload;
     },
     setRandomUserColor: (state) => {
-      state.userColor = generateRandomColor();
+      state.user.color = generateRandomColor();
+    },
+    resetChat: (state) => {
+      state.chat = { ...initialState.chat };
+    },
+    resetCurrentVideo: (state) => {
+      state.currentVideo = { ...initialState.currentVideo };
+    },
+    resetPlayer: (state) => {
+      state.player = { ...initialState.player };
+    },
+    resetOnlineUsers: (state) => {
+      state.onlineUsers = 0;
+    },
+    resetUser: (state) => {
+      state.user = { ...initialState.user };
     },
   },
 });
@@ -119,6 +141,11 @@ export const {
   setUserId,
   setRandomUserColor,
   appendRoomChatMessage,
+  resetChat,
+  resetCurrentVideo,
+  resetPlayer,
+  resetUser,
+  resetOnlineUsers,
 } = roomSlice.actions;
 
 export const { reducer } = roomSlice;

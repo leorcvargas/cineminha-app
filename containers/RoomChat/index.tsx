@@ -7,10 +7,10 @@ import {
 } from '@material-ui/core';
 import PersonIcon from '@material-ui/icons/Person';
 import { ChangeEvent, FC, FormEvent, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { Store } from '../../store/types';
-import { ChatMessage } from '../../store/room';
+import { ChatMessage, resetChat } from '../../store/room';
 import { useStyles } from './styles';
 
 interface SelectedStore {
@@ -29,6 +29,7 @@ const RoomChat: FC<RoomChatProps> = ({ sendChatMessage }) => {
       messages: state.room.chat.messages,
     })
   );
+  const dispatch = useDispatch();
   const classes = useStyles();
   const chatEndRef = useRef(null);
   const [message, setMessage] = useState('');
@@ -67,6 +68,13 @@ const RoomChat: FC<RoomChatProps> = ({ sendChatMessage }) => {
 
     chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [messages.length]);
+
+  useEffect(
+    () => () => {
+      dispatch(resetChat());
+    },
+    []
+  );
 
   return (
     <Paper className={classes.chatWrapper}>
