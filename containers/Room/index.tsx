@@ -26,21 +26,19 @@ interface SelectedStore {
   playing: boolean;
   videoProgress: number;
   playStatusBy: 'client' | 'server';
-  userColor: string;
 }
 
 const Room: FC<RoomProps> = ({ slug }) => {
   const playerRef = useRef(null);
   const classes = useStyles();
 
-  const { playing, videoProgress, playStatusBy, userColor } = useSelector<
+  const { playing, videoProgress, playStatusBy } = useSelector<
     Store,
     SelectedStore
   >((state) => ({
     playing: state.room.player.playing,
     videoProgress: state.room.currentVideo.progress,
     playStatusBy: state.room.player.statusBy,
-    userColor: state.room.userColor,
   }));
   const dispatch = useDispatch();
 
@@ -120,12 +118,6 @@ const Room: FC<RoomProps> = ({ slug }) => {
       channel.push(eventType, { time: videoProgress });
     }
   }, [playing, channel]);
-
-  useEffect(() => {
-    if (!channel) return;
-
-    channel.push('room:user:set:color', { color: userColor });
-  }, [channel]);
 
   useEffect(() => {
     if (!presence) return;
