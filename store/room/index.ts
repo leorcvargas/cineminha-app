@@ -1,21 +1,41 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import generateRandomColor from '../../common/generators/generateColor';
 
+export interface CurrentVideoState {
+  url: string;
+  progress: number;
+  duration: number;
+}
+
+export interface PlayerState {
+  volume: number;
+  muted: boolean;
+  playing: boolean;
+  statusBy: 'client' | 'server';
+}
+
+export interface ChatMessage {
+  userName: string;
+  userColor: string;
+  message: string;
+  sentAt: number;
+}
+
+export interface ChatState {
+  messages: Array<ChatMessage>;
+}
 export interface RoomStore {
-  currentVideo: {
-    url: string;
-    progress: number;
-    duration: number;
-  };
-  player: {
-    volume: number;
-    muted: boolean;
-    playing: boolean;
-    statusBy: 'client' | 'server';
-  };
+  userId: string;
+  userColor: string;
+  currentVideo: CurrentVideoState;
+  player: PlayerState;
+  chat: ChatState;
   onlineUsers: number;
 }
 
 const initialState: RoomStore = {
+  userId: '',
+  userColor: generateRandomColor(),
   currentVideo: {
     url: 'https://www.youtube.com/watch?v=W36QKRS_t5k',
     progress: 0,
@@ -26,6 +46,9 @@ const initialState: RoomStore = {
     muted: false,
     playing: true,
     statusBy: 'client',
+  },
+  chat: {
+    messages: [],
   },
   onlineUsers: 0,
 };
@@ -68,6 +91,17 @@ const roomSlice = createSlice({
     setRoomOnlineUsers: (state, action: PayloadAction<number>) => {
       state.onlineUsers = action.payload;
     },
+    appendRoomChatMessage: (state, action: PayloadAction<ChatMessage>) => {
+      const { messages: currentMessages } = state.chat;
+
+      state.chat.messages = [...currentMessages, action.payload];
+    },
+    setUserId: (state, action: PayloadAction<string>) => {
+      state.userId = action.payload;
+    },
+    setRandomUserColor: (state) => {
+      state.userColor = generateRandomColor();
+    },
   },
 });
 
@@ -82,6 +116,9 @@ export const {
   setVideoProgress,
   setVideoURL,
   setRoomOnlineUsers,
+  setUserId,
+  setRandomUserColor,
+  appendRoomChatMessage,
 } = roomSlice.actions;
 
 export const { reducer } = roomSlice;

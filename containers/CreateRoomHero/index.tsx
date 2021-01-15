@@ -53,13 +53,13 @@ export const CreateRoomHero: React.FC = () => {
         <Grid item>
           <Button
             variant="contained"
-            color="secondary"
+            color="primary"
             onClick={createRoom}
             disabled={creatingRoom}
             size="large"
           >
             {creatingRoom ? (
-              <CircularProgress color="secondary" size={20} />
+              <CircularProgress color="primary" size={20} />
             ) : (
               <span>New Room</span>
             )}

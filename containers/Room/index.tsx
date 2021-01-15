@@ -12,6 +12,8 @@ import {
   setServerPlay,
   setServerPause,
   setRoomOnlineUsers,
+  setUserId,
+  appendRoomChatMessage,
 } from '../../store/room';
 import Player from '../Player';
 import RoomChat from '../RoomChat';
@@ -24,19 +26,21 @@ interface SelectedStore {
   playing: boolean;
   videoProgress: number;
   playStatusBy: 'client' | 'server';
+  userColor: string;
 }
 
 const Room: FC<RoomProps> = ({ slug }) => {
   const playerRef = useRef(null);
   const classes = useStyles();
 
-  const { playing, videoProgress, playStatusBy } = useSelector<
+  const { playing, videoProgress, playStatusBy, userColor } = useSelector<
     Store,
     SelectedStore
   >((state) => ({
     playing: state.room.player.playing,
     videoProgress: state.room.currentVideo.progress,
     playStatusBy: state.room.player.statusBy,
+    userColor: state.room.userColor,
   }));
   const dispatch = useDispatch();
 
@@ -45,11 +49,15 @@ const Room: FC<RoomProps> = ({ slug }) => {
   useEffect(() => {
     if (!channel) return;
 
+    const userId: string = (channel as any).socket.params()['user_id'];
+    dispatch(setUserId(userId));
+
     const events = {
       videoChangeURL: `room:${slug}:video:change:url`,
       videoChangeTime: `room:${slug}:video:change:time`,
       videoPlay: `room:${slug}:video:play`,
       videoPause: `room:${slug}:video:pause`,
+      chatNewMessage: `room:${slug}:chat:new:message`,
     };
 
     const videoChangeURLListener = channel.on(
@@ -75,11 +83,32 @@ const Room: FC<RoomProps> = ({ slug }) => {
       dispatch(setServerPause());
     });
 
+    const chatNewMessageListener = channel.on(
+      events.chatNewMessage,
+      (payload) => {
+        const {
+          user_id: userId,
+          user_color: userColor,
+          message,
+          sent_at: sentAt,
+        } = payload;
+
+        const actionPayload = {
+          userName: userId,
+          userColor,
+          sentAt,
+          message,
+        };
+        dispatch(appendRoomChatMessage(actionPayload));
+      }
+    );
+
     return () => {
       channel.off(events.videoChangeURL, videoChangeURLListener);
       channel.off(events.videoChangeTime, videoChangeTimeListener);
       channel.off(events.videoPlay, videoPlayListener);
       channel.off(events.videoPause, videoPauseListener);
+      channel.off(events.chatNewMessage, chatNewMessageListener);
     };
   }, [channel]);
 
@@ -90,7 +119,13 @@ const Room: FC<RoomProps> = ({ slug }) => {
       const eventType = playing ? 'room:video:play' : 'room:video:pause';
       channel.push(eventType, { time: videoProgress });
     }
-  }, [playing]);
+  }, [playing, channel]);
+
+  useEffect(() => {
+    if (!channel) return;
+
+    channel.push('room:user:set:color', { color: userColor });
+  }, [channel]);
 
   useEffect(() => {
     if (!presence) return;
@@ -115,9 +150,11 @@ const Room: FC<RoomProps> = ({ slug }) => {
     playerRef.current.seekTo(time);
   };
 
-  const onSeekCommitted = (time: number) => {
+  const onSeekCommitted = (time: number) =>
     channel.push('room:video:change:time', { time });
-  };
+
+  const sendChatMessage = (message: string) =>
+    channel.push('room:chat:new:message', { message });
 
   return (
     <Container maxWidth="lg" className={classes.container}>
@@ -130,7 +167,6 @@ const Room: FC<RoomProps> = ({ slug }) => {
           id="video-url"
           name="videoURL"
           placeholder="YouTube Video URL"
-          color="secondary"
           className={classes.input}
         />
         <IconButton type="submit">
@@ -142,7 +178,7 @@ const Room: FC<RoomProps> = ({ slug }) => {
         <div className={classes.row}>
           <Player onSeekCommitted={onSeekCommitted} ref={playerRef} />
 
-          <RoomChat />
+          <RoomChat sendChatMessage={sendChatMessage} />
         </div>
       </Container>
     </Container>
