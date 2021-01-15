@@ -25,6 +25,8 @@ export const useStyles = makeStyles((theme) =>
       zIndex: 1,
     },
     chatBody: {
+      display: 'flex',
+      flexFlow: 'column',
       overflowY: 'auto',
       position: 'absolute',
       top: 64,
@@ -41,6 +43,11 @@ export const useStyles = makeStyles((theme) =>
     messageUserName: {
       marginRight: theme.spacing(),
       fontWeight: 500,
+      whiteSpace: 'pre',
+    },
+    message: {
+      wordBreak: 'break-word',
+      paddingRight: theme.spacing(2),
     },
     chatInputWrapper: {
       bottom: 0,
@@ -50,14 +57,18 @@ export const useStyles = makeStyles((theme) =>
       display: 'flex',
       flexDirection: 'column',
     },
+    chatFormFooter: {
+      display: 'flex',
+      flexFlow: 'row nowrap',
+    },
     chatButton: {
       marginLeft: 'auto',
       marginTop: theme.spacing(2),
     },
     chatInput: {
-      background: theme.palette.grey[100],
-      borderRadius: theme.shape.borderRadius,
-      padding: theme.spacing(),
+      '& .MuiInputBase-root': {
+        color: theme.palette.grey[100],
+      },
     },
     onlineUsers: {
       display: 'flex',

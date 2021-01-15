@@ -1,6 +1,12 @@
-import { Button, InputBase, Paper, Typography } from '@material-ui/core';
+import {
+  Button,
+  FormHelperText,
+  Paper,
+  TextField,
+  Typography,
+} from '@material-ui/core';
 import PersonIcon from '@material-ui/icons/Person';
-import { ChangeEvent, FC, FormEvent, useState } from 'react';
+import { ChangeEvent, FC, FormEvent, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { Store } from '../../store/types';
@@ -24,7 +30,11 @@ const RoomChat: FC<RoomChatProps> = ({ sendChatMessage }) => {
     })
   );
   const classes = useStyles();
+  const chatEndRef = useRef(null);
   const [message, setMessage] = useState('');
+  const [messageInputError, setMessageInputError] = useState<
+    string | undefined
+  >(null);
 
   const onChangeMessageInput = (
     event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
@@ -32,9 +42,27 @@ const RoomChat: FC<RoomChatProps> = ({ sendChatMessage }) => {
 
   const onSubmitMessage = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!message.trim().length) {
+      setMessageInputError("Can't be empty");
+      return;
+    }
+
+    if (message.length >= 300) {
+      setMessageInputError('Maximum length is 300');
+      return;
+    }
+
     sendChatMessage(message);
     setMessage('');
+    setMessageInputError(undefined);
   };
+
+  useEffect(() => {
+    if (!chatEndRef) return;
+
+    chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+  }, [messages.length]);
 
   return (
     <Paper className={classes.chatWrapper}>
@@ -56,28 +84,34 @@ const RoomChat: FC<RoomChatProps> = ({ sendChatMessage }) => {
               >
                 {userName}:
               </span>
-              <span>{message}</span>
+              <span className={classes.message}>{message}</span>
             </span>
           </div>
         ))}
+        <div ref={chatEndRef} />
       </div>
       <div className={classes.chatInputWrapper}>
         <form onSubmit={onSubmitMessage} className={classes.chatForm}>
-          <InputBase
+          <TextField
             value={message}
             placeholder="Send a message"
             className={classes.chatInput}
             onChange={onChangeMessageInput}
           />
 
-          <Button
-            variant="contained"
-            color="primary"
-            className={classes.chatButton}
-            type="submit"
-          >
-            Chat
-          </Button>
+          <div className={classes.chatFormFooter}>
+            {messageInputError && (
+              <FormHelperText error>{messageInputError}</FormHelperText>
+            )}
+            <Button
+              variant="contained"
+              color="primary"
+              className={classes.chatButton}
+              type="submit"
+            >
+              Chat
+            </Button>
+          </div>
         </form>
       </div>
     </Paper>
