@@ -15,9 +15,12 @@ import {
   setUserId,
   appendRoomChatMessage,
   resetOnlineUsers,
+  RoomUserState,
+  setUserName,
 } from '../../store/room';
 import Player from '../Player';
 import RoomChat from '../RoomChat';
+import usePrevious from '../../hooks/usePrevious';
 
 interface RoomProps {
   slug: string;
@@ -27,29 +30,56 @@ interface SelectedStore {
   playing: boolean;
   videoProgress: number;
   playStatusBy: 'client' | 'server';
+  userName: string;
+  userColor: string;
 }
 
 const Room: FC<RoomProps> = ({ slug }) => {
+  const [channel, presence] = useChannel(`room:${slug}`);
   const playerRef = useRef(null);
   const classes = useStyles();
-
-  const { playing, videoProgress, playStatusBy } = useSelector<
-    Store,
-    SelectedStore
-  >((state) => ({
+  const {
+    playing,
+    videoProgress,
+    playStatusBy,
+    userColor,
+    userName,
+  } = useSelector<Store, SelectedStore>((state) => ({
     playing: state.room.player.playing,
     videoProgress: state.room.currentVideo.progress,
     playStatusBy: state.room.player.statusBy,
+    userName: state.room.user.name,
+    userColor: state.room.user.color,
   }));
   const dispatch = useDispatch();
+  const previousUserData = usePrevious({ userName, userColor });
 
-  const [channel, presence] = useChannel(`room:${slug}`);
+  const onSubmit = (event: React.FormEvent<HTMLDivElement>) => {
+    event.preventDefault();
+
+    const url = event.target[0].value;
+
+    dispatch(setVideoURL(url));
+
+    channel.push('room:video:change:url', { url });
+  };
+
+  const onSeek = (time: number) => {
+    playerRef.current.seekTo(time);
+  };
+
+  const onSeekCommitted = (time: number) =>
+    channel.push('room:video:change:time', { time });
+
+  const sendChatMessage = (message: string) =>
+    channel.push('room:chat:new:message', { message });
 
   useEffect(() => {
     if (!channel) return;
 
-    const userId: string = (channel as any).socket.params()['user_id'];
-    dispatch(setUserId(userId));
+    const params = (channel as any).socket.params();
+    dispatch(setUserName(params['user_name']));
+    dispatch(setUserId(params['user_id']));
 
     const events = {
       videoChangeURL: `room:${slug}:video:change:url`,
@@ -86,14 +116,14 @@ const Room: FC<RoomProps> = ({ slug }) => {
       events.chatNewMessage,
       (payload) => {
         const {
-          user_id: userId,
+          user_name: userName,
           user_color: userColor,
           message,
           sent_at: sentAt,
         } = payload;
 
         const actionPayload = {
-          userName: userId,
+          userName: userName,
           userColor,
           sentAt,
           message,
@@ -124,37 +154,42 @@ const Room: FC<RoomProps> = ({ slug }) => {
     if (!presence) return;
 
     presence.onSync(() => {
-      let countOnlineUsers = 0;
-      presence.list(() => {
-        countOnlineUsers++;
+      const onlineUsers: RoomUserState[] = [];
+
+      presence.list((key: string, { metas: [userData] }) => {
+        onlineUsers.push({
+          id: key,
+          name: userData.user_name ?? '',
+          color: userData.user_color ?? '',
+        });
       });
-      dispatch(setRoomOnlineUsers(countOnlineUsers));
+
+      dispatch(setRoomOnlineUsers(onlineUsers));
     });
+
+    return () => {
+      dispatch(resetOnlineUsers());
+    };
   }, [presence]);
 
-  useEffect(
-    () => () => {
-      dispatch(resetOnlineUsers());
-    },
-    []
-  );
+  useEffect(() => {
+    if (!channel) return;
 
-  const onSubmit = (event: React.FormEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    const url = event.target[0].value;
-    dispatch(setVideoURL(url));
-    channel.push('room:video:change:url', { url });
-  };
+    if (userName !== previousUserData.userName && !!previousUserData.userName) {
+      channel.push('room:user:set:name', { name: userName });
+    }
+  }, [channel, userName]);
 
-  const onSeek = (time: number) => {
-    playerRef.current.seekTo(time);
-  };
+  useEffect(() => {
+    if (!channel) return;
 
-  const onSeekCommitted = (time: number) =>
-    channel.push('room:video:change:time', { time });
-
-  const sendChatMessage = (message: string) =>
-    channel.push('room:chat:new:message', { message });
+    if (
+      userColor !== previousUserData.userColor &&
+      !!previousUserData.userColor
+    ) {
+      channel.push('room:user:set:color', { color: userColor });
+    }
+  }, [channel, userColor]);
 
   return (
     <Container maxWidth="lg" className={classes.container}>

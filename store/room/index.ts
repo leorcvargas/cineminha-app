@@ -28,6 +28,7 @@ export interface ChatState {
 export interface RoomUserState {
   id: string;
   color: string;
+  name: string;
 }
 
 export interface RoomStore {
@@ -35,12 +36,13 @@ export interface RoomStore {
   currentVideo: CurrentVideoState;
   player: PlayerState;
   chat: ChatState;
-  onlineUsers: number;
+  onlineUsers: RoomUserState[];
 }
 
 const initialState: RoomStore = {
   user: {
     id: '',
+    name: '',
     color: generateRandomColor(),
   },
   currentVideo: {
@@ -57,7 +59,7 @@ const initialState: RoomStore = {
   chat: {
     messages: [],
   },
-  onlineUsers: 0,
+  onlineUsers: [],
 };
 
 const roomSlice = createSlice({
@@ -95,7 +97,7 @@ const roomSlice = createSlice({
       state.player.playing = false;
       state.player.statusBy = 'server';
     },
-    setRoomOnlineUsers: (state, action: PayloadAction<number>) => {
+    setRoomOnlineUsers: (state, action: PayloadAction<RoomUserState[]>) => {
       state.onlineUsers = action.payload;
     },
     appendRoomChatMessage: (state, action: PayloadAction<ChatMessage>) => {
@@ -105,6 +107,12 @@ const roomSlice = createSlice({
     },
     setUserId: (state, action: PayloadAction<string>) => {
       state.user.id = action.payload;
+    },
+    setUserName: (state, action: PayloadAction<string>) => {
+      state.user.name = action.payload;
+    },
+    setUserColor: (state, action: PayloadAction<string>) => {
+      state.user.color = action.payload;
     },
     setRandomUserColor: (state) => {
       state.user.color = generateRandomColor();
@@ -119,7 +127,7 @@ const roomSlice = createSlice({
       state.player = { ...initialState.player };
     },
     resetOnlineUsers: (state) => {
-      state.onlineUsers = 0;
+      state.onlineUsers = [];
     },
     resetUser: (state) => {
       state.user = { ...initialState.user };
@@ -146,6 +154,8 @@ export const {
   resetPlayer,
   resetUser,
   resetOnlineUsers,
+  setUserColor,
+  setUserName,
 } = roomSlice.actions;
 
 export const { reducer } = roomSlice;

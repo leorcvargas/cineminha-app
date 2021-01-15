@@ -30,24 +30,12 @@ export const useStyles = makeStyles((theme) =>
       overflowY: 'auto',
       position: 'absolute',
       top: 64,
-      bottom: 128,
+      bottom: 136,
       right: 16,
       left: 16,
       zIndex: 0,
-    },
-    messageWrapper: {
-      display: 'flex',
-      marginTop: theme.spacing(),
-      marginBottom: theme.spacing(),
-    },
-    messageUserName: {
-      marginRight: theme.spacing(),
-      fontWeight: 500,
-      whiteSpace: 'pre',
-    },
-    message: {
-      wordBreak: 'break-word',
-      paddingRight: theme.spacing(2),
+      // borderTop: '1px solid rgba(0, 0, 0, 0.12)',
+      // borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
     },
     chatInputWrapper: {
       bottom: 0,
@@ -59,11 +47,10 @@ export const useStyles = makeStyles((theme) =>
     },
     chatFormFooter: {
       display: 'flex',
-      flexFlow: 'row nowrap',
+      flexFlow: 'column nowrap',
     },
     chatButton: {
       marginLeft: 'auto',
-      marginTop: theme.spacing(2),
     },
     chatInput: {
       '& .MuiInputBase-root': {
@@ -76,6 +63,19 @@ export const useStyles = makeStyles((theme) =>
       '& > span': {
         marginRight: '0.3rem',
         lineHeight: 0,
+      },
+    },
+    chatFooterRow: {
+      display: 'flex',
+      flexFlow: 'row nowrap',
+      alignItems: 'center',
+    },
+    chatInputError: {
+      height: 20,
+    },
+    userSettingsDialog: {
+      '& h2, input, label': {
+        color: theme.palette.grey[100],
       },
     },
   })

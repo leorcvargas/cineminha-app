@@ -15,8 +15,10 @@ const PhoenixSocketProvider: FC = ({ children }) => {
   );
 
   useEffect(() => {
+    const userId = `User-${generateId(6)}`;
+    const userName = userId;
     const socket = new Socket(process.env.NEXT_PUBLIC_WS_URL, {
-      params: { user_id: `User-${generateId(6)}`, user_color: userColor },
+      params: { user_id: userId, user_name: userName, user_color: userColor },
     });
     socket.connect();
     setSocket(socket);

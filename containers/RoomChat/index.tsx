@@ -1,20 +1,31 @@
 import {
   Button,
+  Dialog,
   FormHelperText,
+  IconButton,
   Paper,
   TextField,
   Typography,
 } from '@material-ui/core';
 import PersonIcon from '@material-ui/icons/Person';
+import UserIdIcon from '@material-ui/icons/AssignmentInd';
 import { ChangeEvent, FC, FormEvent, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { Store } from '../../store/types';
-import { ChatMessage, resetChat } from '../../store/room';
+import {
+  ChatMessage,
+  resetChat,
+  RoomUserState,
+  setUserColor,
+  setUserName,
+} from '../../store/room';
 import { useStyles } from './styles';
+import RoomUserSettings from '../RoomUserSettings';
+import RoomChatMessage from '../../components/RoomChatMessage';
 
 interface SelectedStore {
-  onlineUsers: number;
+  onlineUsers: RoomUserState[];
   messages: ChatMessage[];
 }
 
@@ -36,6 +47,7 @@ const RoomChat: FC<RoomChatProps> = ({ sendChatMessage }) => {
   const [messageInputError, setMessageInputError] = useState<
     string | undefined
   >(null);
+  const [userSettingsOpen, setUserSettingsOpen] = useState(false);
 
   const onChangeMessageInput = (
     event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
@@ -63,6 +75,19 @@ const RoomChat: FC<RoomChatProps> = ({ sendChatMessage }) => {
     setMessageInputError(undefined);
   };
 
+  const openUserSettings = () => setUserSettingsOpen(true);
+
+  const closeUserSettings = () => setUserSettingsOpen(false);
+
+  const saveAndCloseUserSettings = (userSettings: {
+    color: string;
+    name: string;
+  }) => {
+    dispatch(setUserName(userSettings.name));
+    dispatch(setUserColor(userSettings.color));
+    closeUserSettings();
+  };
+
   useEffect(() => {
     if (!chatEndRef) return;
 
@@ -81,24 +106,19 @@ const RoomChat: FC<RoomChatProps> = ({ sendChatMessage }) => {
       <div className={classes.chatHeader}>
         <Typography variant="h6">Room Chat</Typography>
         <Typography variant="subtitle2" className={classes.onlineUsers}>
-          <span>{onlineUsers}</span>
+          <span>{onlineUsers.length}</span>
           <PersonIcon fontSize="small" />
         </Typography>
       </div>
 
       <div className={classes.chatBody}>
         {messages.map(({ message, userName, userColor }, i) => (
-          <div className={classes.messageWrapper} key={i}>
-            <span>
-              <span
-                className={classes.messageUserName}
-                style={{ color: userColor }}
-              >
-                {userName}:
-              </span>
-              <span className={classes.message}>{message}</span>
-            </span>
-          </div>
+          <RoomChatMessage
+            key={i}
+            message={message}
+            userName={userName}
+            userColor={userColor}
+          />
         ))}
         <div ref={chatEndRef} />
       </div>
@@ -112,17 +132,39 @@ const RoomChat: FC<RoomChatProps> = ({ sendChatMessage }) => {
           />
 
           <div className={classes.chatFormFooter}>
-            {messageInputError && (
-              <FormHelperText error>{messageInputError}</FormHelperText>
-            )}
-            <Button
-              variant="contained"
-              color="primary"
-              className={classes.chatButton}
-              type="submit"
-            >
-              Chat
-            </Button>
+            <FormHelperText className={classes.chatInputError} error>
+              {messageInputError ?? ''}
+            </FormHelperText>
+
+            <div className={classes.chatFooterRow}>
+              <IconButton color="inherit" onClick={openUserSettings}>
+                <UserIdIcon />
+              </IconButton>
+
+              <Dialog
+                open={userSettingsOpen}
+                onClose={closeUserSettings}
+                aria-labelledby="form-user-settings-dialog"
+                className={classes.userSettingsDialog}
+                maxWidth="xs"
+                fullWidth
+                keepMounted={false}
+              >
+                <RoomUserSettings
+                  onSave={saveAndCloseUserSettings}
+                  onClose={closeUserSettings}
+                />
+              </Dialog>
+
+              <Button
+                variant="contained"
+                color="primary"
+                className={classes.chatButton}
+                type="submit"
+              >
+                Chat
+              </Button>
+            </div>
           </div>
         </form>
       </div>
