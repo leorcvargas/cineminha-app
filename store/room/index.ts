@@ -1,52 +1,14 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+
 import generateRandomColor from '../../common/generators/generateColor';
+import { ChatMessage, RoomStore, RoomUserState, RoomVideoState } from './types';
+import * as client from '../../api';
+import { SearchYouTubeVideoResult } from '../../api/types';
 
-export interface CurrentVideoState {
-  url: string;
-  progress: number;
-  duration: number;
-}
-
-export interface PlayerState {
-  volume: number;
-  muted: boolean;
-  playing: boolean;
-  statusBy: 'client' | 'server';
-  fullscreen: boolean;
-}
-
-export interface ChatMessage {
-  userName: string;
-  userColor: string;
-  message: string;
-  sentAt: number;
-}
-
-export interface ChatState {
-  messages: Array<ChatMessage>;
-}
-
-export interface RoomUserState {
-  id: string;
-  color: string;
-  name: string;
-}
-
-export interface RoomVideoState {
-  id: number;
-  url: string;
-  roomId: string;
-  inserted_at: Date;
-}
-
-export interface RoomStore {
-  user: RoomUserState;
-  currentVideo: CurrentVideoState;
-  videos: RoomVideoState[];
-  player: PlayerState;
-  chat: ChatState;
-  onlineUsers: RoomUserState[];
-}
+export const searchYouTubeVideo = createAsyncThunk(
+  'posts/fetchPosts',
+  async (q: string) => client.searchYouTubeVideo(q)
+);
 
 const initialState: RoomStore = {
   user: {
@@ -71,6 +33,11 @@ const initialState: RoomStore = {
     messages: [],
   },
   onlineUsers: [],
+  youtubeSearch: {
+    result: [],
+    status: null,
+    error: null,
+  },
 };
 
 const roomSlice = createSlice({
@@ -155,6 +122,28 @@ const roomSlice = createSlice({
     },
     resetUser: (state) => {
       state.user = { ...initialState.user };
+    },
+  },
+  extraReducers: {
+    [searchYouTubeVideo.pending.type]: (state) => {
+      state.youtubeSearch.status = 'loading';
+    },
+    [searchYouTubeVideo.rejected.type]: (state, action) => {
+      state.youtubeSearch.status = 'failed';
+      state.youtubeSearch.error = action.payload;
+    },
+    [searchYouTubeVideo.fulfilled.type]: (
+      state,
+      action: PayloadAction<SearchYouTubeVideoResult[]>
+    ) => {
+      state.youtubeSearch.status = 'succeeded';
+      state.youtubeSearch.result = action.payload.map((item) => ({
+        channelName: item.channel_name,
+        id: item.id,
+        title: item.title,
+        thumbnailUrl: item.thumbnail_url,
+        url: item.url,
+      }));
     },
   },
 });

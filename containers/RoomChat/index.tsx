@@ -13,13 +13,8 @@ import { ChangeEvent, FC, FormEvent, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { Store } from '../../store/types';
-import {
-  ChatMessage,
-  resetChat,
-  RoomUserState,
-  setUserColor,
-  setUserName,
-} from '../../store/room';
+import { resetChat, setUserColor, setUserName } from '../../store/room';
+import { ChatMessage, RoomUserState } from '../../store/room/types';
 import { useStyles } from './styles';
 import RoomUserSettings from '../RoomUserSettings';
 import RoomChatMessage from '../../components/RoomChatMessage';

@@ -1,5 +1,4 @@
-import { Container, IconButton, InputBase, Paper } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
+import { Container } from '@material-ui/core';
 import React, { FC, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -15,13 +14,14 @@ import {
   setUserId,
   appendRoomChatMessage,
   resetOnlineUsers,
-  RoomUserState,
   setUserName,
   setVideos,
 } from '../../store/room';
+import { RoomUserState } from '../../store/room/types';
 import Player from '../Player';
 import RoomChat from '../RoomChat';
 import usePrevious from '../../hooks/usePrevious';
+import SearchVideo from '../SearchVideo';
 
 interface RoomProps {
   slug: string;
@@ -58,11 +58,7 @@ const Room: FC<RoomProps> = ({ slug }) => {
     userColor,
   });
 
-  const onSubmit = (event: React.FormEvent<HTMLDivElement>) => {
-    event.preventDefault();
-
-    const url = event.target[0].value;
-
+  const handleVideoChange = (url: string) => {
     dispatch(setVideoURL(url));
 
     channel.push('room:video:change:url', { url });
@@ -195,21 +191,7 @@ const Room: FC<RoomProps> = ({ slug }) => {
 
   return (
     <Container maxWidth="lg" className={classes.container}>
-      <Paper
-        component="form"
-        className={classes.inputWrapper}
-        onSubmit={onSubmit}
-      >
-        <InputBase
-          id="video-url"
-          name="videoURL"
-          placeholder="YouTube Video URL"
-          className={classes.input}
-        />
-        <IconButton type="submit">
-          <SearchIcon />
-        </IconButton>
-      </Paper>
+      <SearchVideo onChooseVideo={handleVideoChange} />
 
       <Container maxWidth="lg" className={classes.container}>
         <div className={classes.row}>
