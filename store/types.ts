@@ -1,4 +1,4 @@
-import { RoomStore } from './room';
+import { RoomStore } from './room/types';
 
 export interface Store {
   room: RoomStore;
